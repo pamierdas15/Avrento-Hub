@@ -85,7 +85,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
           <div style={{ fontSize: 12, fontWeight: 700, color: '#fbbf24', marginBottom: 4 }}>⚠ {alertas.length} alerta{alertas.length > 1 ? 's' : ''} de pago</div>
           {alertas.slice(0, 2).map((al, i) => (
             <div key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
-              · {al.nombre} — {al.tipo === 'mensual' ? 'mensualidad pendiente' : al.pendientes + ' sesión' + (al.pendientes > 1 ? 'es' : '') + ' sin cobrar'}
+              · {al.nombre} — {al.count} pago{al.count > 1 ? 's' : ''} pendiente{al.count > 1 ? 's' : ''}
             </div>
           ))}
           {alertas.length > 2 ? <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 2 }}>Ver todas →</div> : null}

@@ -33,7 +33,13 @@ export const FTIPO_BTN_CFG = {
   ausencia: { bg: 'rgba(248,113,113,0.12)', color: '#f87171', border: 'rgba(248,113,113,0.4)' }
 }
 
-export const WA_DEFAULT = 'Hola {nombre}, te recordamos que tienes pendiente el pago de {importe} correspondiente a las clases de Academia Avrento. ¡Gracias!'
+// Plantillas de recordatorio de WhatsApp según la modalidad de pago del alumno.
+// Placeholders disponibles en las tres: {nombre}, {importe}, {pendientes}
+export const WA_DEFAULTS = {
+  fija: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el mes de {pendientes}, con un importe de {importe}. Gracias de antemano.',
+  semana: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el importe de {importe}, que corresponde a {pendientes}. Gracias de antemano.',
+  sesion: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el importe de {importe}, que corresponde a {pendientes}. Gracias de antemano.'
+}
 
 // Modalidades de pago disponibles para un alumno
 export const MODALIDAD_CFG = {
