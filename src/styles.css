@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@400;600;700;800&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Work Sans',Arial,sans-serif}
+html,body{height:100%;background:#04060c;color:#fff}
+
+.app{
+  --bg-base:#04060c;
+  --line:rgba(255,255,255,0.08);
+  --text:#F5F7FF;
+  --text-muted:#8A93AD;
+  --accent:#4d9fff;
+  --accent2:#7c8fff;
+  --accent-soft:rgba(77,159,255,0.14);
+  --accent-line:rgba(77,159,255,0.32);
+  --card-top:#101a33;
+  --card-bottom:#070b16;
+  --card-top-2:#142244;
+  --green:#34d399; --green-soft:rgba(52,211,153,0.14); --green-line:rgba(52,211,153,0.32);
+  --red:#f87171; --red-soft:rgba(248,113,113,0.14); --red-line:rgba(248,113,113,0.32);
+  --amber:#fbbf24; --amber-soft:rgba(251,191,36,0.14); --amber-line:rgba(251,191,36,0.32);
+  --purple:#a78bfa; --purple-soft:rgba(167,139,250,0.14); --purple-line:rgba(167,139,250,0.32);
+  width:100%;height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  background-color:var(--bg-base);
+  background-image:
+    radial-gradient(rgba(255,255,255,0.045) 1px, transparent 1.4px),
+    radial-gradient(circle at 18% 6%, rgba(77,159,255,0.22), transparent 42%),
+    radial-gradient(circle at 88% 88%, rgba(124,143,255,0.14), transparent 46%),
+    radial-gradient(120% 60% at 50% -10%, #0d1730 0%, #04060c 55%);
+  background-size:26px 26px, auto, auto, auto;
+  background-repeat:repeat, no-repeat, no-repeat, no-repeat;
+  color:var(--text);
+}
+.views-wrap{flex:1;min-height:0;position:relative}
+.view{display:none;position:absolute;inset:0;overflow-y:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.view.on{display:block}
+
+/* ---- Header de marca (Inicio) ---- */
+.app-header{display:flex;align-items:center;gap:12px;padding-top:6px;margin-bottom:20px}
+.logo-img{width:42px;height:42px;min-width:42px;border-radius:13px;box-shadow:0 8px 22px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.02em;line-height:1;display:flex}
+.logo-avrento{color:#fff}
+.logo-hub{color:var(--accent);text-shadow:0 0 22px rgba(77,159,255,0.45)}
+.header-eyebrow{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:5px 10px}
+
+/* ---- Header del resto de pestañas (logo + título) ---- */
+.screen-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.screen-header-logo{width:30px;height:30px;min-width:30px;border-radius:9px;box-shadow:0 6px 16px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
+.screen-header-title{font-family:'Raleway',sans-serif;font-weight:400;font-size:21px;letter-spacing:-0.005em;line-height:1.1;color:#fff}
+
+/* ---- Barra inferior con burbuja flotante ---- */
+.tab-bar{position:relative;display:flex;height:76px;flex-shrink:0;background:rgba(4,6,12,0.78);backdrop-filter:blur(20px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tab-slot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding-bottom:11px;border:none;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tab-icon-wrap{display:flex;align-items:center;justify-content:center;width:34px;height:34px;color:var(--text-muted);transition:all 0.25s cubic-bezier(0.34,1.15,0.64,1)}
+.tab-icon-wrap-active{width:50px;height:50px;border-radius:50%;margin-top:-26px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04070f;box-shadow:0 10px 24px rgba(77,159,255,0.45),inset 0 1px 0 rgba(255,255,255,0.35)}
+.tab-label{font-size:9px;color:var(--text-muted);font-weight:500;letter-spacing:0.01em}
+
+.section-pad{padding:16px 14px 0}
+
+/* ---- Tarjetas ---- */
+.card{background:linear-gradient(180deg,var(--card-top),var(--card-bottom));border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.04);border-radius:16px;padding:14px 16px;margin-bottom:10px;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
+.card:active{opacity:0.75}
+.card-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.avatar{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 4px 10px rgba(0,0,0,0.35)}
+.alumno-name{font-size:14px;font-weight:700;color:#fff}
+.alumno-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em}
+.badge-fija{background:var(--accent-soft);color:var(--accent)}
+.badge-sesion{background:var(--purple-soft);color:var(--purple)}
+.badge-pend{background:var(--amber-soft);color:var(--amber)}
+.badge-ok{background:var(--green-soft);color:var(--green)}
+.badge-aus{background:var(--red-soft);color:var(--red)}
+.badge-just{background:var(--accent-soft);color:var(--accent)}
+
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 5px;-webkit-tap-highlight-color:transparent}
+.dia-btn{padding:6px 10px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,0.04);font-size:12px;cursor:pointer;color:var(--text-muted);-webkit-tap-highlight-color:transparent}
+.dia-btn.on{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 4px 14px rgba(77,159,255,0.35)}
+
+/* ---- Modales ---- */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:20;justify-content:center;align-items:flex-end}
+.modal-bg.on{display:flex}
+.modal{background:linear-gradient(180deg,#101a33,#070b16);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));width:100%;max-width:430px;max-height:88vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,0.55)}
+.modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 14px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.01em;margin-bottom:14px;color:#fff}
+
+.inp-label{font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:4px;display:block}
+.inp-row{margin-bottom:10px}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:rgba(255,255,255,0.05);color:#fff;font-family:'Work Sans',sans-serif;-webkit-appearance:none;appearance:none}
+input[type="date"]{color-scheme:dark}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.25)}
+select option{background:#0f1829;color:#fff}
+textarea{height:70px;resize:none}
+
+.btn-primary{width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent;box-shadow:0 8px 22px rgba(77,159,255,0.3)}
+.btn-primary:active{opacity:0.75}
+.btn-secondary{width:100%;padding:11px;border-radius:14px;border:1px solid var(--accent-line);background:transparent;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
+.btn-secondary:active{opacity:0.75}
+.btn-danger{width:100%;padding:11px;border-radius:14px;border:none;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
+.btn-danger:active{opacity:0.75}
+
+.empty{text-align:center;padding:2.5rem 0;color:rgba(255,255,255,0.35);font-size:13px}
+
+.seg{display:flex;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px;margin-bottom:12px;border:1px solid var(--line)}
+.seg-btn{flex:1;padding:6px;border:none;background:transparent;border-radius:8px;font-size:12px;cursor:pointer;color:var(--text-muted);font-family:'Work Sans',sans-serif;-webkit-tap-highlight-color:transparent}
+.seg-btn.on{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;font-weight:700;box-shadow:0 4px 14px rgba(77,159,255,0.3)}
+
+.resumen-hero{background:linear-gradient(160deg,#152a52,#0a1226);border:1px solid var(--accent-line);border-radius:20px;padding:20px;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.06)}
+.resumen-hero .label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.resumen-hero .val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:0.01em;color:#fff}
+
+.resumen-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rcard{background:linear-gradient(180deg,var(--card-top-2),var(--card-bottom));border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
+.rcard .rl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.rcard .rv{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.01em}
+.rv.green{color:var(--green)}
+.rv.red{color:var(--red)}
+.rv.purple{color:var(--accent)}
+
+.quick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card-top-2),var(--card-bottom));cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+.quick-btn:active{opacity:0.7}
+.quick-btn .qico{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+.toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:99;box-shadow:0 10px 26px rgba(77,159,255,0.4)}
+.toast.show{opacity:1}
+
+.hist-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.hist-item:last-child{border-bottom:none}
+
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px;gap:6px}
+.cal-week-label{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.01em;color:#fff;flex:1;text-align:center}
+.cal-nav{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,0.04);cursor:pointer;font-size:16px;color:var(--accent);flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line);padding:0 10px}
+.cal-day-hdr{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text-muted);padding:4px 0;text-transform:uppercase}
+.cal-day-hdr.today-col{color:var(--accent)}
+.cal-grid{padding:0 10px 10px}
+.cal-slot{min-height:52px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:3px;padding:5px 2px}
+.cal-slot:last-child{border-bottom:none}
+.cal-event{border-radius:8px;padding:4px 7px;font-size:11px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cal-event .ev-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cal-event .ev-hora{font-size:10px;font-weight:400;opacity:0.7}
+.cal-today-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 auto 2px}
+.cal-empty-msg{text-align:center;padding:2rem 0;color:rgba(255,255,255,0.35);font-size:13px}
+
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.ftipo-btn{padding:7px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:'Work Sans',sans-serif;border:1px solid var(--line);background:rgba(255,255,255,0.04);color:var(--text-muted);-webkit-tap-highlight-color:transparent}
