@@ -17,6 +17,14 @@ export default function AlertasModal({ open, alertas, onClose }) {
             <div style={{ fontSize: 12, color: '#fbbf24', fontWeight: 700, marginTop: 2 }}>Mensualidad sin cobrar · {fmt(al.tarifa)}</div>
           </div>
         </div>
+      ) : al.tipo === 'semanal' ? (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(45,212,191,0.08)', borderRadius: 12, marginBottom: 8, borderLeft: '3px solid #2dd4bf' }}>
+          <div style={{ fontSize: 20 }}>🗓️</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{al.nombre}</div>
+            <div style={{ fontSize: 12, color: '#2dd4bf', fontWeight: 700, marginTop: 2 }}>Semana sin cobrar · {fmt(al.tarifa)}</div>
+          </div>
+        </div>
       ) : (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(248,113,113,0.08)', borderRadius: 12, marginBottom: 8, borderLeft: '3px solid #f87171' }}>
           <div style={{ fontSize: 20 }}>📋</div>

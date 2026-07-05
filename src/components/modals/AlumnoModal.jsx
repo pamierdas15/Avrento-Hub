@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Modal from '../Modal.jsx'
-import { CURSOS, ESTADO_BTN_CFG } from '../../utils/constants'
+import { CURSOS, ESTADO_BTN_CFG, MODALIDAD_CFG } from '../../utils/constants'
 import { todayStr } from '../../utils/helpers'
 
 const DIAS_BTNS = [
@@ -10,7 +10,7 @@ const DIAS_BTNS = [
 
 const BLANK = {
   id: '', nombre: '', curso: '1º ESO', materia: '', estado: 'activo', alta: todayStr(),
-  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioSesion: '', notas: ''
+  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioSemana: '', precioSesion: '', notas: ''
 }
 
 export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, showToast }) {
@@ -38,10 +38,13 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       hora: form.hora,
       modalidad: form.modalidad,
       tarifa: parseFloat(form.tarifa) || 0,
+      precioSemana: parseFloat(form.precioSemana) || 0,
       precioSesion: parseFloat(form.precioSesion) || 0,
       notas: form.notas.trim()
     })
   }
+
+  const modCfg = MODALIDAD_CFG[form.modalidad]
 
   return (
     <Modal open={open}>
@@ -116,22 +119,16 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       <div className="inp-row">
         <label className="inp-label">Modalidad de pago</label>
         <select value={form.modalidad} onChange={e => set('modalidad', e.target.value)}>
-          <option value="fija">Tarifa fija mensual</option>
-          <option value="sesion">Precio por sesión</option>
+          <option value="fija">{MODALIDAD_CFG.fija.selectLabel}</option>
+          <option value="semana">{MODALIDAD_CFG.semana.selectLabel}</option>
+          <option value="sesion">{MODALIDAD_CFG.sesion.selectLabel}</option>
         </select>
       </div>
 
-      {form.modalidad === 'fija' ? (
-        <div className="inp-row">
-          <label className="inp-label">Tarifa mensual (€)</label>
-          <input type="number" placeholder="0,00" step="0.01" min="0" value={form.tarifa} onChange={e => set('tarifa', e.target.value)} />
-        </div>
-      ) : (
-        <div className="inp-row">
-          <label className="inp-label">Precio por sesión (€)</label>
-          <input type="number" placeholder="0,00" step="0.01" min="0" value={form.precioSesion} onChange={e => set('precioSesion', e.target.value)} />
-        </div>
-      )}
+      <div className="inp-row">
+        <label className="inp-label">{modCfg.tarifaLabel}</label>
+        <input type="number" placeholder="0,00" step="0.01" min="0" value={form[modCfg.campo]} onChange={e => set(modCfg.campo, e.target.value)} />
+      </div>
 
       <div className="inp-row">
         <label className="inp-label">Notas (opcional)</label>

@@ -66,6 +66,7 @@ html,body{height:100%;background:#04060c;color:#fff}
 
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em}
 .badge-fija{background:var(--accent-soft);color:var(--accent)}
+.badge-semana{background:rgba(45,212,191,0.14);color:#2dd4bf}
 .badge-sesion{background:var(--purple-soft);color:var(--purple)}
 .badge-pend{background:var(--amber-soft);color:var(--amber)}
 .badge-ok{background:var(--green-soft);color:var(--green)}

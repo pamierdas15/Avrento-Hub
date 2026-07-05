@@ -35,9 +35,16 @@ export const FTIPO_BTN_CFG = {
 
 export const WA_DEFAULT = 'Hola {nombre}, te recordamos que tienes pendiente el pago de {importe} correspondiente a las clases de Academia Avrento. ¡Gracias!'
 
+// Modalidades de pago disponibles para un alumno
+export const MODALIDAD_CFG = {
+  fija: { label: 'Mensual', badgeClass: 'badge-fija', suffix: '/mes', campo: 'tarifa', tarifaLabel: 'Tarifa mensual (€)', selectLabel: 'Pago mensual' },
+  semana: { label: 'Semanal', badgeClass: 'badge-semana', suffix: '/sem.', campo: 'precioSemana', tarifaLabel: 'Tarifa semanal (€)', selectLabel: 'Pago semana' },
+  sesion: { label: 'Por sesión', badgeClass: 'badge-sesion', suffix: '/ses.', campo: 'precioSesion', tarifaLabel: 'Precio por sesión (€)', selectLabel: 'Pago por sesión' }
+}
+
 // En el proyecto Vite esto apunta al icono real servido desde /public.
 // En el artifact consolidado este valor se sustituye por un data URI en base64.
-export const LOGO_DATA_URI = '/avrentohub/icon-512.png'
+export const LOGO_DATA_URI = '/icon-512.png'
 
 export const CURSOS = [
   { label: 'ESO', options: ['1º ESO', '2º ESO', '3º ESO', '4º ESO'] },

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import ScreenHeader from '../components/ScreenHeader.jsx'
-import { ESTADO_CFG, DIAS_FULL, TURNOS } from '../utils/constants'
+import { ESTADO_CFG, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { initials, alumnoColor, fmt } from '../utils/helpers'
 
 export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
@@ -48,8 +48,8 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                    <span className={'badge ' + (a.modalidad === 'fija' ? 'badge-fija' : 'badge-sesion')}>{a.modalidad === 'fija' ? 'Mensual' : 'Por sesión'}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#4d9fff' }}>{a.modalidad === 'fija' ? fmt(a.tarifa) + '/mes' : fmt(a.precioSesion) + '/ses.'}</span>
+                    <span className={'badge ' + MODALIDAD_CFG[a.modalidad || 'fija'].badgeClass}>{MODALIDAD_CFG[a.modalidad || 'fija'].label}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#4d9fff' }}>{fmt(a[MODALIDAD_CFG[a.modalidad || 'fija'].campo]) + MODALIDAD_CFG[a.modalidad || 'fija'].suffix}</span>
                   </div>
                 </div>
               </div>

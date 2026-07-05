@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import ScreenHeader from '../components/ScreenHeader.jsx'
-import { DIAS_FULL, TURNOS } from '../utils/constants'
+import { DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { fmt, alumnoColor, initials, todayStr } from '../utils/helpers'
 
 export default function Resumen({ data, onAbrirBackup, showToast }) {
@@ -17,12 +17,15 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
   function exportExcel() {
     if (!data.alumnos.length) { showToast('No hay datos para exportar'); return }
     const wb = XLSX.utils.book_new()
-    const ws1 = XLSX.utils.json_to_sheet(data.alumnos.map(a => ({
-      'Nombre': a.nombre, 'Curso': a.curso || '', 'Materia': a.materia || '', 'Estado': a.estado || 'activo',
-      'Fecha alta': a.alta || '', 'Días': (a.dias || []).map(x => DIAS_FULL[parseInt(x)]).join(', '),
-      'Turno': TURNOS[a.hora] || a.hora || '', 'Modalidad': a.modalidad === 'fija' ? 'Mensual' : 'Por sesión',
-      'Tarifa (€)': a.modalidad === 'fija' ? a.tarifa : a.precioSesion
-    })))
+    const ws1 = XLSX.utils.json_to_sheet(data.alumnos.map(a => {
+      const modCfg = MODALIDAD_CFG[a.modalidad || 'fija']
+      return {
+        'Nombre': a.nombre, 'Curso': a.curso || '', 'Materia': a.materia || '', 'Estado': a.estado || 'activo',
+        'Fecha alta': a.alta || '', 'Días': (a.dias || []).map(x => DIAS_FULL[parseInt(x)]).join(', '),
+        'Turno': TURNOS[a.hora] || a.hora || '', 'Modalidad': modCfg.selectLabel,
+        'Tarifa (€)': a[modCfg.campo]
+      }
+    }))
     XLSX.utils.book_append_sheet(wb, ws1, 'Alumnos')
 
     const asR = data.sesiones.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(s => {

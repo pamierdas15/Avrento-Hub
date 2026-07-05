@@ -7,7 +7,6 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
   const hoy = new Date()
   const hoyISO = todayStr()
   const dsHoy = hoy.getDay()
-  const nombreDia = hoy.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
   const alertas = getAlertas(data)
 
   const [weekOffset, setWeekOffset] = useState(0)
@@ -56,7 +55,6 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
       <div className="app-header">
         <img src={LOGO_DATA_URI} className="logo-img" alt="AvrentoHub" />
         <div className="logo-text"><span className="logo-avrento">Avrento</span><span className="logo-hub">Hub</span></div>
-        <span className="header-eyebrow" style={{ textTransform: 'capitalize' }}>{nombreDia}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 18 }}>
         <button className="quick-btn" onClick={onNuevoAlumno}>

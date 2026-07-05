@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import ScreenHeader from '../components/ScreenHeader.jsx'
+import { MODALIDAD_CFG } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
+import { getPendientesDetalle } from '../utils/business'
 
 export default function Pagos({ data, registrarPago, eliminarPago, showToast, onAbrirWhatsapp }) {
   const { alumnos } = data
@@ -11,10 +13,20 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
   const [fecha, setFecha] = useState(todayStr())
 
   const alumno = alumnos.find(a => a.id === alumnoId)
+  const modCfg = alumno ? MODALIDAD_CFG[alumno.modalidad || 'fija'] : null
+  const pendientes = alumno ? getPendientesDetalle(data, alumno) : []
 
   useEffect(() => {
-    if (alumno) setImporte(alumno.modalidad === 'fija' ? String(alumno.tarifa) : String(alumno.precioSesion))
+    if (alumno && modCfg) setImporte(String(alumno[modCfg.campo] || ''))
   }, [alumnoId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function aplicarPendiente(value) {
+    const item = pendientes.find(p => p.value === value)
+    if (!item) return
+    setImporte(String(item.importe))
+    setConcepto(item.concepto)
+    setTipo('recibido')
+  }
 
   function guardar() {
     const imp = parseFloat(importe)
@@ -38,11 +50,11 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
         </select>
       </div>
 
-      {alumno ? (
+      {alumno && modCfg ? (
         <div style={{ marginBottom: 10 }}>
           <div className="card" style={{ padding: '10px 12px', background: 'rgba(37,99,235,0.1)', borderColor: 'rgba(77,159,255,0.2)' }}>
-            <span className={'badge ' + (alumno.modalidad === 'fija' ? 'badge-fija' : 'badge-sesion')}>{alumno.modalidad === 'fija' ? 'Mensual' : 'Por sesión'}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#4d9fff', marginLeft: 8 }}>{alumno.modalidad === 'fija' ? fmt(alumno.tarifa) + ' /mes' : fmt(alumno.precioSesion) + ' /sesión'}</span>
+            <span className={'badge ' + modCfg.badgeClass}>{modCfg.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#4d9fff', marginLeft: 8 }}>{fmt(alumno[modCfg.campo]) + ' ' + modCfg.suffix}</span>
           </div>
         </div>
       ) : null}
@@ -55,6 +67,27 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
         <label className="inp-label">Importe (€)</label>
         <input type="number" placeholder="0,00" step="0.01" min="0" value={importe} onChange={e => setImporte(e.target.value)} />
       </div>
+
+      {alumno && modCfg ? (
+        <div className="inp-row">
+          <label className="inp-label">Tipo de pago del alumno</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 11px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, background: 'rgba(255,255,255,0.05)' }}>
+            <span className={'badge ' + modCfg.badgeClass}>{modCfg.label}</span>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{modCfg.selectLabel}</span>
+          </div>
+        </div>
+      ) : null}
+
+      {alumno && pendientes.length ? (
+        <div className="inp-row">
+          <label className="inp-label">Pagos pendientes</label>
+          <select value="" onChange={e => aplicarPendiente(e.target.value)}>
+            <option value="">{pendientes.length} pendiente{pendientes.length > 1 ? 's' : ''} · Seleccionar...</option>
+            {pendientes.map(p => <option value={p.value} key={p.value}>{p.label}</option>)}
+          </select>
+        </div>
+      ) : null}
+
       <div className="inp-row">
         <label className="inp-label">Concepto</label>
         <input type="text" placeholder="Ej: Mensualidad junio..." value={concepto} onChange={e => setConcepto(e.target.value)} />

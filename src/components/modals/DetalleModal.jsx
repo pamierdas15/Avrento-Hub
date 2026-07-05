@@ -1,5 +1,5 @@
 import Modal from '../Modal.jsx'
-import { ESTADO_CFG } from '../../utils/constants'
+import { ESTADO_CFG, MODALIDAD_CFG } from '../../utils/constants'
 import { initials, alumnoColor, fmt } from '../../utils/helpers'
 
 export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }) {
@@ -24,8 +24,8 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
           <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{a.nombre}</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{a.curso || ''}{a.materia ? ' · ' + a.materia : ''}</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-            <span className={'badge ' + (a.modalidad === 'fija' ? 'badge-fija' : 'badge-sesion')}>
-              {a.modalidad === 'fija' ? 'Mensual · ' + fmt(a.tarifa) : 'Por sesión · ' + fmt(a.precioSesion)}
+            <span className={'badge ' + MODALIDAD_CFG[a.modalidad || 'fija'].badgeClass}>
+              {MODALIDAD_CFG[a.modalidad || 'fija'].label} · {fmt(a[MODALIDAD_CFG[a.modalidad || 'fija'].campo]) + MODALIDAD_CFG[a.modalidad || 'fija'].suffix}
             </span>
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: eb.bg, color: eb.color }}>{eb.txt}</span>
           </div>
