@@ -27,6 +27,10 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
   function guardar() {
     if (!form.nombre.trim()) { showToast('Introduce el nombre'); return }
+    const reactivando = form.estado === 'activo' && editing && editing.estado !== 'activo'
+    const activoDesde = reactivando
+      ? todayStr()
+      : (editing?.activoDesde || form.alta || todayStr())
     onSave({
       id: form.id || Date.now().toString(),
       nombre: form.nombre.trim(),
@@ -34,6 +38,7 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       materia: form.materia.trim(),
       estado: form.estado,
       alta: form.alta,
+      activoDesde,
       dias: form.dias,
       hora: form.hora,
       modalidad: form.modalidad,

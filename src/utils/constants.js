@@ -2,6 +2,7 @@ export const SK = 'avrento_hub_v1'
 export const WA_SK = 'avrento_wa'
 export const FES_SK = 'avrento_festivos'
 export const BACKUP_SK = 'avrento_ultimo_backup'
+export const AUTO_BACKUP_SK = 'avrento_auto_backup_on'
 
 export const DIAS_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 export const DIAS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']

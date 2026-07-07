@@ -17,19 +17,34 @@ function pagoEnRango(pagos, alumnoId, desde, hasta) {
   })
 }
 
+// Fecha desde la que cuenta el conteo de pendientes: la de alta, o la de la
+// última reactivación si el alumno estuvo pausado/de baja y volvió a activo.
+function inicioConteo(alumno) {
+  return alumno.activoDesde || alumno.alta || todayStr()
+}
+
 // Sesiones "presente" cuya fecha ya ha pasado (no cuentan las de hoy ni futuras)
-function sesionesPasadas(d, alumnoId) {
+// y que son posteriores al inicio del conteo vigente para el alumno.
+function sesionesPasadas(d, alumno) {
   const hoyISO = todayStr()
-  return d.sesiones.filter(s => s.alumnoId === alumnoId && s.estado === 'presente' && s.fecha < hoyISO)
+  const desde = inicioConteo(alumno)
+  return d.sesiones.filter(s => s.alumnoId === alumno.id && s.estado === 'presente' && s.fecha < hoyISO && s.fecha >= desde)
 }
 
 function capitaliza(s) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
+// Mientras un alumno está pausado o de baja, no se genera ningún pago pendiente nuevo.
+function conteoParalizado(alumno) {
+  return alumno.estado === 'pausado' || alumno.estado === 'baja'
+}
+
 // ---- Periodos pendientes por modalidad (fuente única de verdad) ----
 
 function pendientesMensuales(d, alumno) {
+  if (conteoParalizado(alumno)) return []
   const hoy = new Date()
-  const inicio = alumno.alta ? new Date(alumno.alta + 'T12:00:00') : hoy
+  const desde = inicioConteo(alumno)
+  const inicio = new Date(desde + 'T12:00:00')
   let y = inicio.getFullYear(), m = inicio.getMonth()
   const limitY = hoy.getFullYear(), limitM = hoy.getMonth()
   const incluyeMesActual = hoy.getDate() > 15
@@ -61,10 +76,11 @@ function pendientesMensuales(d, alumno) {
 }
 
 function pendientesSemanales(d, alumno) {
+  if (conteoParalizado(alumno)) return []
   const hoy = new Date()
   const hoyLunes = inicioSemana(hoy)
   const ultimoLunes = new Date(hoyLunes); ultimoLunes.setDate(hoyLunes.getDate() - 7)
-  let inicio = alumno.alta ? inicioSemana(new Date(alumno.alta + 'T12:00:00')) : ultimoLunes
+  let inicio = inicioSemana(new Date(inicioConteo(alumno) + 'T12:00:00'))
   const maxLookbackMs = 12 * 7 * 24 * 60 * 60 * 1000
   if (ultimoLunes - inicio > maxLookbackMs) inicio = new Date(ultimoLunes.getTime() - maxLookbackMs)
   const out = []
@@ -90,8 +106,12 @@ function pendientesSemanales(d, alumno) {
 }
 
 function pendientesSesiones(d, alumno) {
-  const ses = sesionesPasadas(d, alumno.id).length
-  const total = d.pagos.filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido').reduce((s, p) => s + p.importe, 0)
+  if (conteoParalizado(alumno)) return []
+  const desde = inicioConteo(alumno)
+  const ses = sesionesPasadas(d, alumno).length
+  const total = d.pagos
+    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde)
+    .reduce((s, p) => s + p.importe, 0)
   const pag = alumno.precioSesion > 0 ? Math.floor(total / alumno.precioSesion) : 0
   const pend = ses - pag
   if (pend <= 0) return []
@@ -119,7 +139,7 @@ export function getPendientesDetalle(d, alumno) {
 // Resumen único de lo pendiente de un alumno: nº de periodos, importe total,
 // y texto legible de a qué corresponde (usado en alertas y en WhatsApp)
 export function getResumenPendiente(d, alumno) {
-  if (!alumno) return { count: 0, importe: 0, texto: '' }
+  if (!alumno || conteoParalizado(alumno)) return { count: 0, importe: 0, texto: '' }
   if (alumno.modalidad === 'fija') {
     const items = pendientesMensuales(d, alumno)
     const importe = items.reduce((s, it) => s + it.importe, 0)
@@ -141,10 +161,11 @@ export function getResumenPendiente(d, alumno) {
 
 // Alumnos con algún pago pendiente (misma fuente que la pestaña Pagos).
 // Cada alerta es simplemente: nombre del alumno + número de pagos pendientes.
+// Los alumnos pausados o de baja nunca generan alertas.
 export function getAlertas(d) {
   const res = []
   d.alumnos.forEach(a => {
-    if (a.estado === 'baja') return
+    if (conteoParalizado(a)) return
     const resumen = getResumenPendiente(d, a)
     if (resumen.count > 0) res.push({ nombre: a.nombre, count: resumen.count })
   })
