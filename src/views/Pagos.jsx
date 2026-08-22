@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import ScreenHeader from '../components/ScreenHeader.jsx'
 import { MODALIDAD_CFG } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
-import { getPendientesDetalle } from '../utils/business'
+import { getPendientesDetalle, getClasesExtraDetalle } from '../utils/business'
 
 export default function Pagos({ data, registrarPago, eliminarPago, showToast, onAbrirWhatsapp }) {
   const { alumnos } = data
@@ -15,6 +15,7 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
   const alumno = alumnos.find(a => a.id === alumnoId)
   const modCfg = alumno ? MODALIDAD_CFG[alumno.modalidad || 'fija'] : null
   const pendientes = alumno ? getPendientesDetalle(data, alumno) : []
+  const clasesExtra = alumno ? getClasesExtraDetalle(data, alumno) : []
 
   useEffect(() => {
     if (alumno && modCfg) setImporte(String(alumno[modCfg.campo] || ''))
@@ -22,6 +23,14 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
 
   function aplicarPendiente(value) {
     const item = pendientes.find(p => p.value === value)
+    if (!item) return
+    setImporte(String(item.importe))
+    setConcepto(item.concepto)
+    setTipo('recibido')
+  }
+
+  function aplicarClaseExtra(value) {
+    const item = clasesExtra.find(p => p.value === value)
     if (!item) return
     setImporte(String(item.importe))
     setConcepto(item.concepto)
@@ -85,6 +94,19 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
             <option value="">{pendientes.length} pendiente{pendientes.length > 1 ? 's' : ''} · Seleccionar...</option>
             {pendientes.map(p => <option value={p.value} key={p.value}>{p.label}</option>)}
           </select>
+        </div>
+      ) : null}
+
+      {alumno && clasesExtra.length ? (
+        <div className="inp-row">
+          <label className="inp-label">⚡ Clases Extra</label>
+          <select value="" onChange={e => aplicarClaseExtra(e.target.value)} style={{ borderColor: 'rgba(251,191,36,0.4)' }}>
+            <option value="">{clasesExtra.length} sin cobrar · Seleccionar...</option>
+            {clasesExtra.map(p => <option value={p.value} key={p.value}>{p.label}</option>)}
+          </select>
+          <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 4 }}>
+            Este alumno ha dado más clases de las incluidas en su mensualidad.
+          </div>
         </div>
       ) : null}
 

@@ -127,6 +127,67 @@ function pendientesSesiones(d, alumno) {
   return out
 }
 
+// Nº total de clases extra acumuladas desde el inicio del conteo: suma, semana a
+// semana, de las sesiones "presente" que superan el nº de clases semanales
+// incluidas en la mensualidad del alumno.
+function clasesExtraAcumuladas(d, alumno) {
+  if (!alumno.clasesSemanales || alumno.clasesSemanales <= 0) return 0
+  const hoy = new Date()
+  const hoyLunes = inicioSemana(hoy)
+  let cursor = inicioSemana(new Date(inicioConteo(alumno) + 'T12:00:00'))
+  const maxLookbackMs = 24 * 7 * 24 * 60 * 60 * 1000
+  if (hoyLunes - cursor > maxLookbackMs) cursor = new Date(hoyLunes.getTime() - maxLookbackMs)
+  let total = 0
+  let guard = 0
+  while (cursor <= hoyLunes && guard < 30) {
+    const domingo = new Date(cursor); domingo.setDate(cursor.getDate() + 6); domingo.setHours(23, 59, 59, 999)
+    const count = d.sesiones.filter(s => {
+      if (s.alumnoId !== alumno.id || s.estado !== 'presente') return false
+      const f = new Date(s.fecha + 'T12:00:00')
+      return f >= cursor && f <= domingo
+    }).length
+    if (count > alumno.clasesSemanales) total += (count - alumno.clasesSemanales)
+    cursor = new Date(cursor); cursor.setDate(cursor.getDate() + 7)
+    guard++
+  }
+  return total
+}
+
+// Clases extra pendientes de cobro (solo alumnos de modalidad mensual con
+// un nº de clases semanales configurado). Cada elemento permite registrar
+// el cobro de 1..N clases extra con un clic, igual que el resto de pendientes.
+export function getClasesExtraDetalle(d, alumno) {
+  if (!alumno || conteoParalizado(alumno)) return []
+  if (alumno.modalidad !== 'fija' || !alumno.clasesSemanales) return []
+  const totalExtra = clasesExtraAcumuladas(d, alumno)
+  if (totalExtra <= 0) return []
+  const desde = inicioConteo(alumno)
+  const precio = alumno.precioSesion || 0
+  const pagado = d.pagos
+    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde && /clase extra/i.test(p.concepto || ''))
+    .reduce((s, p) => s + p.importe, 0)
+  const pagadas = precio > 0 ? Math.floor(pagado / precio) : 0
+  const pend = totalExtra - pagadas
+  if (pend <= 0) return []
+  const out = []
+  for (let n = 1; n <= pend; n++) {
+    out.push({
+      value: 'extra-' + n,
+      label: `${n} clase${n > 1 ? 's' : ''} extra · ${fmt(n * precio)}`,
+      importe: n * precio,
+      concepto: `${n} clase${n > 1 ? 's' : ''} extra pendiente${n > 1 ? 's' : ''}`
+    })
+  }
+  return out
+}
+
+// Resumen (count/importe) de clases extra pendientes, para plegarlo en las alertas.
+function getResumenClasesExtra(d, alumno) {
+  const items = getClasesExtraDetalle(d, alumno)
+  const pend = items.length
+  return { count: pend, importe: pend * (alumno.precioSesion || 0) }
+}
+
 // Lista de periodos pendientes de cobro para un alumno, según su modalidad de pago.
 // Cada elemento sirve para rellenar el formulario de "Registrar pago" con un clic.
 export function getPendientesDetalle(d, alumno) {
@@ -137,14 +198,20 @@ export function getPendientesDetalle(d, alumno) {
 }
 
 // Resumen único de lo pendiente de un alumno: nº de periodos, importe total,
-// y texto legible de a qué corresponde (usado en alertas y en WhatsApp)
+// y texto legible de a qué corresponde (usado en alertas y en WhatsApp).
+// En modalidad mensual incluye también las clases extra sin cobrar.
 export function getResumenPendiente(d, alumno) {
   if (!alumno || conteoParalizado(alumno)) return { count: 0, importe: 0, texto: '' }
   if (alumno.modalidad === 'fija') {
     const items = pendientesMensuales(d, alumno)
-    const importe = items.reduce((s, it) => s + it.importe, 0)
-    const texto = items.map(it => it.periodo).join(' y ')
-    return { count: items.length, importe, texto }
+    const extra = getResumenClasesExtra(d, alumno)
+    const importe = items.reduce((s, it) => s + it.importe, 0) + extra.importe
+    let texto = items.map(it => it.periodo).join(' y ')
+    if (extra.count > 0) {
+      const extraTxt = `${extra.count} clase${extra.count > 1 ? 's' : ''} extra`
+      texto = texto ? `${texto} y ${extraTxt}` : extraTxt
+    }
+    return { count: items.length + extra.count, importe, texto }
   }
   if (alumno.modalidad === 'semana') {
     const items = pendientesSemanales(d, alumno)

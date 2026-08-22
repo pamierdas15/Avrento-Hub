@@ -8,9 +8,12 @@ const DIAS_BTNS = [
   { v: '5', t: 'Vie' }, { v: '6', t: 'Sáb' }, { v: '0', t: 'Dom' }
 ]
 
+const CLASES_SEMANALES_OPCIONES = [1, 2, 3, 4, 5, 6]
+
 const BLANK = {
   id: '', nombre: '', curso: '1º ESO', materia: '', estado: 'activo', alta: todayStr(),
-  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioSemana: '', precioSesion: '', notas: ''
+  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioSemana: '', precioSesion: '',
+  clasesSemanales: 0, notas: ''
 }
 
 export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, showToast }) {
@@ -23,6 +26,9 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
   function toggleDia(v) {
     setForm(f => ({ ...f, dias: f.dias.includes(v) ? f.dias.filter(x => x !== v) : [...f.dias, v] }))
+  }
+  function toggleClasesSemanales(n) {
+    setForm(f => ({ ...f, clasesSemanales: f.clasesSemanales === n ? 0 : n }))
   }
 
   function guardar() {
@@ -45,6 +51,7 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       tarifa: parseFloat(form.tarifa) || 0,
       precioSemana: parseFloat(form.precioSemana) || 0,
       precioSesion: parseFloat(form.precioSesion) || 0,
+      clasesSemanales: form.modalidad === 'fija' ? (parseInt(form.clasesSemanales) || 0) : 0,
       notas: form.notas.trim()
     })
   }
@@ -134,6 +141,27 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
         <label className="inp-label">{modCfg.tarifaLabel}</label>
         <input type="number" placeholder="0,00" step="0.01" min="0" value={form[modCfg.campo]} onChange={e => set(modCfg.campo, e.target.value)} />
       </div>
+
+      {form.modalidad === 'fija' ? (
+        <div className="inp-row">
+          <label className="inp-label">Clases semanales incluidas en la mensualidad</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+            {CLASES_SEMANALES_OPCIONES.map(n => (
+              <button type="button" key={n} className={'dia-btn' + (form.clasesSemanales === n ? ' on' : '')} onClick={() => toggleClasesSemanales(n)}>{n}</button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+            Si algún mes registra más clases de las indicadas aquí, aparecerán como "Clases Extra" en Pagos.
+          </div>
+        </div>
+      ) : null}
+
+      {form.modalidad === 'fija' && form.clasesSemanales > 0 ? (
+        <div className="inp-row">
+          <label className="inp-label">Precio por clase extra (€)</label>
+          <input type="number" placeholder="0,00" step="0.01" min="0" value={form.precioSesion} onChange={e => set('precioSesion', e.target.value)} />
+        </div>
+      ) : null}
 
       <div className="inp-row">
         <label className="inp-label">Notas (opcional)</label>
