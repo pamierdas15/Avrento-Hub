@@ -31,7 +31,7 @@ function TareaItem({ alumno, tarea, onGuardar }) {
   )
 }
 
-export default function Asistencia({ data, registrarSesion, eliminarSesion, guardarTarea, showToast }) {
+export default function Asistencia({ data, esFestivo, registrarSesion, eliminarSesion, guardarTarea, showToast }) {
   const { alumnos } = data
   const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
   const [fecha, setFecha] = useState(todayStr())
@@ -51,7 +51,7 @@ export default function Asistencia({ data, registrarSesion, eliminarSesion, guar
       <ScreenHeader title="Asistencia" />
 
       <div className="sec-label">Calendario</div>
-      <CalendarioHero />
+      <CalendarioHero data={data} esFestivo={esFestivo} />
 
       <div className="inp-row" style={{ marginTop: 18 }}>
         <label className="inp-label">Alumno</label>

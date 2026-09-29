@@ -145,16 +145,17 @@ textarea{height:70px;resize:none}
 .sec-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
 .ftipo-btn{padding:7px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:'Work Sans',sans-serif;border:1px solid var(--line);background:rgba(255,255,255,0.04);color:var(--text-muted);-webkit-tap-highlight-color:transparent}
 
-/* ---- Calendario hero (Asistencia): puramente visual, sin datos de la app ---- */
-.cal-hero{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;margin-bottom:20px}
+/* ---- Calendario hero (Asistencia): calendario semanal de solo lectura ---- */
+.cal-hero{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:12px;margin-bottom:20px}
 .cal-hero-header{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
-.cal-hero-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.02em;color:#fff;flex:1;text-align:center;text-transform:capitalize;cursor:pointer}
-.cal-hero-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-hero-dow{margin-bottom:4px}
-.cal-hero-dow div{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
-.cal-hero-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;color:rgba(255,255,255,0.75)}
-.cal-hero-cell.cal-hero-empty{visibility:hidden}
-.cal-hero-cell.cal-hero-today{background:linear-gradient(135deg,#1a4fd6,#2563eb);color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(77,159,255,0.4)}
+.cal-hero-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.02em;color:#fff;flex:1;text-align:center}
+.cal-hero-dias{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line);padding:0 2px;margin-bottom:6px}
+.cal-hero-dia-hdr{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text-muted);padding:4px 0;text-transform:uppercase}
+.cal-hero-dia-hdr.today-col{color:var(--accent)}
+.cal-hero-slot{min-height:50px;display:flex;flex-direction:column;gap:3px;padding:4px 2px}
+.cal-hero-event{border-radius:8px;padding:4px 6px;font-size:10.5px;font-weight:700}
+.cal-hero-event .ev-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cal-hero-event .ev-hora{font-size:9.5px;font-weight:400;opacity:0.7}
 
 /* ---- Tareas pendientes (Asistencia) ---- */
 .tarea-card{margin-bottom:10px}

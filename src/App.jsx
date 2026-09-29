@@ -119,6 +119,7 @@ export default function App() {
         return (
           <Asistencia
             data={data}
+            esFestivo={esFestivo}
             registrarSesion={store.registrarSesion}
             eliminarSesion={store.eliminarSesion}
             guardarTarea={store.guardarTarea}
