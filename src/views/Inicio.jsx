@@ -156,21 +156,19 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
 
             {expanded ? (
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="mini-hero">
-                  <div className="mini-hero-label">Asistencia</div>
-                  {sesH ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Presente' : sesH.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada'}</span>
-                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ya registrada</span>
-                    </div>
-                  ) : (
-                    <button className="btn-primary" onClick={() => regDesdeInicio(a.id)}>Confirmar asistencia</button>
-                  )}
-                </div>
-
-                <div className="mini-hero mini-hero-click" onClick={() => onIrAPago(a.id)}>
-                  <div className="mini-hero-label">Pago</div>
-                  <div style={{ fontSize: 12, color: '#a78bfa', fontWeight: 700 }}>Ir a la ficha de pagos →</div>
+                <div className="mini-btn-row">
+                  <button
+                    className={'mini-btn mini-btn-asistencia' + (sesH ? ' mini-btn-done' : '')}
+                    onClick={() => !sesH && regDesdeInicio(a.id)}
+                    disabled={!!sesH}
+                  >
+                    {sesH
+                      ? (sesH.estado === 'presente' ? '✓ Presente' : sesH.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada')
+                      : '✓ Confirmar asistencia'}
+                  </button>
+                  <button className="mini-btn mini-btn-pago" onClick={() => onIrAPago(a.id)}>
+                    💳 Pago
+                  </button>
                 </div>
 
                 <TareaPendienteHero alumnoId={a.id} onGuardar={guardarTarea} showToast={showToast} />

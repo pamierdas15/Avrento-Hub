@@ -164,6 +164,15 @@ textarea{height:70px;resize:none}
 .mini-hero .btn-primary{margin-top:2px}
 .mini-hero-click{cursor:pointer}
 .mini-hero-click:active{background:rgba(255,255,255,0.07)}
+.mini-hero-toggle{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* ---- Botones Asistencia / Pago en línea (Inicio → alumno de la clase) ---- */
+.mini-btn-row{display:flex;gap:8px}
+.mini-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-btn:disabled{cursor:default}
+.mini-btn-asistencia{border:1px solid rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:#34d399}
+.mini-btn-asistencia.mini-btn-done{border-color:var(--line);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.55)}
+.mini-btn-pago{border:1px solid rgba(167,139,250,0.35);background:rgba(167,139,250,0.1);color:#a78bfa}
 
 /* ---- Tareas pendientes en el perfil del alumno (DetalleModal) ---- */
 .tarea-perfil-item{padding:8px 0;border-bottom:1px solid var(--line)}
