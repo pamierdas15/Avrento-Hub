@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@400;600;700;800&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Work Sans',Arial,sans-serif}
 html,body{height:100%;background:#04060c;color:#fff}
@@ -36,16 +36,16 @@ html,body{height:100%;background:#04060c;color:#fff}
 
 /* ---- Header de marca (Inicio) ---- */
 .app-header{display:flex;align-items:center;gap:12px;padding-top:6px;margin-bottom:20px}
-.logo-img{width:42px;height:42px;min-width:42px;border-radius:13px;box-shadow:0 8px 22px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
-.logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.02em;line-height:1;display:flex}
+.logo-img{width:24px;height:24px;min-width:24px;border-radius:7px;box-shadow:0 8px 22px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.02em;line-height:1;display:flex;align-items:center}
 .logo-avrento{color:#fff}
 .logo-hub{color:var(--accent);text-shadow:0 0 22px rgba(77,159,255,0.45)}
 .header-eyebrow{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:5px 10px}
 
 /* ---- Header del resto de pestañas (logo + título) ---- */
 .screen-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.screen-header-logo{width:30px;height:30px;min-width:30px;border-radius:9px;box-shadow:0 6px 16px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
-.screen-header-title{font-family:'Raleway',sans-serif;font-weight:400;font-size:21px;letter-spacing:-0.005em;line-height:1.1;color:#fff}
+.screen-header-logo{width:24px;height:24px;min-width:24px;border-radius:7px;box-shadow:0 6px 16px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
+.screen-header-title{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:24px;letter-spacing:0.01em;line-height:1;color:#fff;display:flex;align-items:center}
 
 /* ---- Barra inferior con burbuja flotante ---- */
 .tab-bar{position:relative;display:flex;height:76px;flex-shrink:0;background:rgba(4,6,12,0.78);backdrop-filter:blur(20px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -144,3 +144,19 @@ textarea{height:70px;resize:none}
 
 .sec-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
 .ftipo-btn{padding:7px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:'Work Sans',sans-serif;border:1px solid var(--line);background:rgba(255,255,255,0.04);color:var(--text-muted);-webkit-tap-highlight-color:transparent}
+
+/* ---- Calendario hero (Asistencia): puramente visual, sin datos de la app ---- */
+.cal-hero{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;margin-bottom:20px}
+.cal-hero-header{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
+.cal-hero-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.02em;color:#fff;flex:1;text-align:center;text-transform:capitalize;cursor:pointer}
+.cal-hero-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-hero-dow{margin-bottom:4px}
+.cal-hero-dow div{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+.cal-hero-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;color:rgba(255,255,255,0.75)}
+.cal-hero-cell.cal-hero-empty{visibility:hidden}
+.cal-hero-cell.cal-hero-today{background:linear-gradient(135deg,#1a4fd6,#2563eb);color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(77,159,255,0.4)}
+
+/* ---- Tareas pendientes (Asistencia) ---- */
+.tarea-card{margin-bottom:10px}
+.tarea-textarea{font-family:'Work Sans',sans-serif;font-size:13px;min-height:64px}
+.tarea-fecha{font-size:10px;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em}

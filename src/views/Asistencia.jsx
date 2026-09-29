@@ -1,8 +1,37 @@
 import { useState } from 'react'
 import ScreenHeader from '../components/ScreenHeader.jsx'
+import CalendarioHero from '../components/CalendarioHero.jsx'
 import { todayStr } from '../utils/helpers'
 
-export default function Asistencia({ data, registrarSesion, eliminarSesion, showToast }) {
+function TareaItem({ alumno, tarea, onGuardar }) {
+  const [texto, setTexto] = useState(tarea?.texto || '')
+
+  function guardar() {
+    if (texto === (tarea?.texto || '')) return
+    onGuardar(alumno.id, texto)
+  }
+
+  return (
+    <div className="card tarea-card">
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 6 }}>{alumno.nombre}</div>
+      <textarea
+        className="tarea-textarea"
+        value={texto}
+        onChange={e => setTexto(e.target.value)}
+        onBlur={guardar}
+        placeholder="Escribe aquí las tareas pendientes de este alumno..."
+        rows={3}
+      />
+      {tarea?.fecha ? (
+        <div className="tarea-fecha">
+          Actualizado el {new Date(tarea.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export default function Asistencia({ data, registrarSesion, eliminarSesion, guardarTarea, showToast }) {
   const { alumnos } = data
   const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
   const [fecha, setFecha] = useState(todayStr())
@@ -15,11 +44,16 @@ export default function Asistencia({ data, registrarSesion, eliminarSesion, show
   }
 
   const ses = data.sesiones.filter(s => s.alumnoId === alumnoId).slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
+  const activos = alumnos.filter(a => a.estado === 'activo')
 
   return (
     <div className="section-pad">
       <ScreenHeader title="Asistencia" />
-      <div className="inp-row">
+
+      <div className="sec-label">Calendario</div>
+      <CalendarioHero />
+
+      <div className="inp-row" style={{ marginTop: 18 }}>
         <label className="inp-label">Alumno</label>
         <select value={alumnoId} onChange={e => setAlumnoId(e.target.value)}>
           {alumnos.length
@@ -56,6 +90,11 @@ export default function Asistencia({ data, registrarSesion, eliminarSesion, show
           </>
         )}
       </div>
+
+      <div className="sec-label" style={{ marginTop: 22 }}>Tareas Pendientes</div>
+      {activos.length ? activos.map(a => (
+        <TareaItem key={a.id} alumno={a} tarea={data.tareas?.[a.id]} onGuardar={guardarTarea} />
+      )) : <p className="empty">No hay alumnos activos</p>}
     </div>
   )
 }

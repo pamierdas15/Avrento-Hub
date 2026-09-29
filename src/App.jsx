@@ -3,15 +3,11 @@ import TabBar from './components/TabBar.jsx'
 import Toast from './components/Toast.jsx'
 import Inicio from './views/Inicio.jsx'
 import Alumnos from './views/Alumnos.jsx'
-import Calendario from './views/Calendario.jsx'
 import Asistencia from './views/Asistencia.jsx'
 import Pagos from './views/Pagos.jsx'
 import Resumen from './views/Resumen.jsx'
 import AlumnoModal from './components/modals/AlumnoModal.jsx'
 import DetalleModal from './components/modals/DetalleModal.jsx'
-import EventoModal from './components/modals/EventoModal.jsx'
-import VerFestivoModal from './components/modals/VerFestivoModal.jsx'
-import FestivoModal from './components/modals/FestivoModal.jsx'
 import AlertasModal from './components/modals/AlertasModal.jsx'
 import BackupModal from './components/modals/BackupModal.jsx'
 import WhatsappModal from './components/modals/WhatsappModal.jsx'
@@ -24,7 +20,7 @@ import { todayStr } from './utils/helpers.js'
 
 export default function App() {
   const store = useAppData()
-  const { data, festivos, esFestivo } = store
+  const { data, esFestivo } = store
   const { msg, show, showToast } = useToast()
 
   const [tab, setTab] = useState('inicio')
@@ -35,15 +31,6 @@ export default function App() {
 
   // Modal: detalle
   const [detalleId, setDetalleId] = useState(null)
-
-  // Modal: evento calendario
-  const [evento, setEvento] = useState(null) // {alumnoId, fecha}
-
-  // Modal: ver festivo
-  const [verFestivoFecha, setVerFestivoFecha] = useState(null)
-
-  // Modal: crear festivo
-  const [festivoModalOpen, setFestivoModalOpen] = useState(false)
 
   // Modal: alertas
   const [alertasOpen, setAlertasOpen] = useState(false)
@@ -110,24 +97,6 @@ export default function App() {
     showToast('Alumno eliminado')
   }
 
-  function registrarSesionYAvisar(alumnoId, fecha, estado) {
-    const ok = store.registrarSesion(alumnoId, fecha, estado)
-    if (ok) { setEvento(null); showToast('Asistencia registrada') }
-    return ok
-  }
-
-  function guardarFestivo(festivo) {
-    store.guardarFestivo(festivo)
-    setFestivoModalOpen(false)
-    showToast('Día bloqueado')
-  }
-
-  function eliminarFestivo(fecha) {
-    store.eliminarFestivo(fecha)
-    setVerFestivoFecha(null)
-    showToast('Día desbloqueado')
-  }
-
   const alertasActuales = getAlertas(data)
 
   function renderView() {
@@ -146,18 +115,16 @@ export default function App() {
         )
       case 'alumnos':
         return <Alumnos data={data} onNuevoAlumno={abrirNuevoAlumno} onVerDetalle={setDetalleId} />
-      case 'calendario':
+      case 'asistencia':
         return (
-          <Calendario
+          <Asistencia
             data={data}
-            esFestivo={esFestivo}
-            onVerEvento={(alumnoId, fecha) => setEvento({ alumnoId, fecha })}
-            onVerFestivo={setVerFestivoFecha}
-            onAbrirFestivo={() => setFestivoModalOpen(true)}
+            registrarSesion={store.registrarSesion}
+            eliminarSesion={store.eliminarSesion}
+            guardarTarea={store.guardarTarea}
+            showToast={showToast}
           />
         )
-      case 'asistencia':
-        return <Asistencia data={data} registrarSesion={store.registrarSesion} eliminarSesion={store.eliminarSesion} showToast={showToast} />
       case 'pagos':
         return <Pagos data={data} registrarPago={store.registrarPago} eliminarPago={store.eliminarPago} showToast={showToast} onAbrirWhatsapp={() => setWaOpen(true)} />
       case 'resumen':
@@ -189,32 +156,6 @@ export default function App() {
         data={data}
         onClose={() => setDetalleId(null)}
         onEditar={abrirEditarAlumno}
-      />
-
-      <EventoModal
-        open={!!evento}
-        alumnoId={evento?.alumnoId}
-        fecha={evento?.fecha}
-        data={data}
-        onClose={() => setEvento(null)}
-        onRegistrar={registrarSesionYAvisar}
-      />
-
-      <VerFestivoModal
-        open={!!verFestivoFecha}
-        fecha={verFestivoFecha}
-        festivo={verFestivoFecha ? esFestivo(verFestivoFecha) : null}
-        data={data}
-        onClose={() => setVerFestivoFecha(null)}
-        onEliminar={eliminarFestivo}
-      />
-
-      <FestivoModal
-        open={festivoModalOpen}
-        data={data}
-        onClose={() => setFestivoModalOpen(false)}
-        onGuardar={guardarFestivo}
-        showToast={showToast}
       />
 
       <AlertasModal open={alertasOpen} alertas={alertasActuales} onClose={() => setAlertasOpen(false)} />

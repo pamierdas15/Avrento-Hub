@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { SK, FES_SK } from '../utils/constants'
+import { todayStr } from '../utils/helpers'
 
 function loadData() {
+  const base = { alumnos: [], sesiones: [], pagos: [], tareas: {} }
   try {
     const parsed = JSON.parse(localStorage.getItem(SK))
-    return parsed || { alumnos: [], sesiones: [], pagos: [] }
+    return parsed ? { ...base, ...parsed, tareas: parsed.tareas || {} } : base
   } catch {
-    return { alumnos: [], sesiones: [], pagos: [] }
+    return base
   }
 }
 
@@ -88,7 +90,15 @@ export function useAppData() {
 
   // ---- Backup ----
   const restaurarBackup = useCallback((nuevaData) => {
-    setData(nuevaData)
+    setData({ tareas: {}, ...nuevaData })
+  }, [])
+
+  // ---- Tareas pendientes (por alumno) ----
+  const guardarTarea = useCallback((alumnoId, texto) => {
+    setData(d => ({
+      ...d,
+      tareas: { ...(d.tareas || {}), [alumnoId]: { texto, fecha: todayStr() } }
+    }))
   }, [])
 
   return {
@@ -103,6 +113,7 @@ export function useAppData() {
     eliminarPago,
     guardarFestivo,
     eliminarFestivo,
-    restaurarBackup
+    restaurarBackup,
+    guardarTarea
   }
 }

@@ -1,9 +1,8 @@
-import { Home, Users, Calendar, ClipboardCheck, Wallet, BarChart3 } from 'lucide-react'
+import { Home, Users, ClipboardCheck, Wallet, BarChart3 } from 'lucide-react'
 
 const TAB_DEFS = [
   { id: 'inicio', label: 'Inicio', Icon: Home },
   { id: 'alumnos', label: 'Alumnos', Icon: Users },
-  { id: 'calendario', label: 'Calendario', Icon: Calendar },
   { id: 'asistencia', label: 'Asistencia', Icon: ClipboardCheck },
   { id: 'pagos', label: 'Pagos', Icon: Wallet },
   { id: 'resumen', label: 'Resumen', Icon: BarChart3 }
