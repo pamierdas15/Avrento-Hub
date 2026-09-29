@@ -34,16 +34,30 @@ html,body{height:100%;background:#04060c;color:#fff}
 .view{display:none;position:absolute;inset:0;overflow-y:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .view.on{display:block}
 
-/* ---- Header de marca (Inicio) ---- */
-.app-header{display:flex;align-items:center;gap:12px;padding-top:6px;margin-bottom:20px}
+/* ---- Header de marca (Inicio) — fijo arriba, 40px ---- */
+.app-header{
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:5;
+  height:40px;flex-shrink:0;
+  margin:0 -14px 16px;padding:0 14px;
+  background:rgba(4,6,12,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
 .logo-img{width:24px;height:24px;min-width:24px;border-radius:7px;box-shadow:0 8px 22px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
 .logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.02em;line-height:1;display:flex;align-items:center}
 .logo-avrento{color:#fff}
 .logo-hub{color:var(--accent);text-shadow:0 0 22px rgba(77,159,255,0.45)}
 .header-eyebrow{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:5px 10px}
 
-/* ---- Header del resto de pestañas (logo + título) ---- */
-.screen-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+/* ---- Header del resto de pestañas (logo + título) — fijo arriba, 40px ---- */
+.screen-header{
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:5;
+  height:40px;flex-shrink:0;
+  margin:0 -14px 16px;padding:0 14px;
+  background:rgba(4,6,12,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
 .screen-header-logo{width:24px;height:24px;min-width:24px;border-radius:7px;box-shadow:0 6px 16px rgba(77,159,255,0.35),inset 0 1px 0 rgba(255,255,255,0.25);background:linear-gradient(135deg,#132244,#0a1226)}
 .screen-header-title{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:24px;letter-spacing:0.01em;line-height:1;color:#fff;display:flex;align-items:center}
 
