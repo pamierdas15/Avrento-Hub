@@ -44,11 +44,16 @@ export function useAppData() {
   }, [])
 
   const eliminarAlumno = useCallback((id) => {
-    setData(d => ({
-      alumnos: d.alumnos.filter(a => a.id !== id),
-      sesiones: d.sesiones.filter(s => s.alumnoId !== id),
-      pagos: d.pagos.filter(p => p.alumnoId !== id)
-    }))
+    setData(d => {
+      const tareas = { ...(d.tareas || {}) }
+      delete tareas[id]
+      return {
+        alumnos: d.alumnos.filter(a => a.id !== id),
+        sesiones: d.sesiones.filter(s => s.alumnoId !== id),
+        pagos: d.pagos.filter(p => p.alumnoId !== id),
+        tareas
+      }
+    })
   }, [])
 
   // ---- Sesiones (asistencia) ----
@@ -94,11 +99,20 @@ export function useAppData() {
   }, [])
 
   // ---- Tareas pendientes (por alumno) ----
-  const guardarTarea = useCallback((alumnoId, texto) => {
-    setData(d => ({
-      ...d,
-      tareas: { ...(d.tareas || {}), [alumnoId]: { texto, fecha: todayStr() } }
-    }))
+  // Cada alumno acumula una lista de tareas: { id, tarea, evento, fecha }
+  const guardarTarea = useCallback((alumnoId, { tarea, evento, fecha }) => {
+    setData(d => {
+      const actuales = (d.tareas && d.tareas[alumnoId]) || []
+      const nueva = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr() }
+      return { ...d, tareas: { ...(d.tareas || {}), [alumnoId]: [...actuales, nueva] } }
+    })
+  }, [])
+
+  const eliminarTarea = useCallback((alumnoId, tareaId) => {
+    setData(d => {
+      const actuales = (d.tareas && d.tareas[alumnoId]) || []
+      return { ...d, tareas: { ...(d.tareas || {}), [alumnoId]: actuales.filter(t => t.id !== tareaId) } }
+    })
   }, [])
 
   return {
@@ -114,6 +128,7 @@ export function useAppData() {
     guardarFestivo,
     eliminarFestivo,
     restaurarBackup,
-    guardarTarea
+    guardarTarea,
+    eliminarTarea
   }
 }

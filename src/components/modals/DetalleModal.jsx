@@ -15,6 +15,7 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
   const cobrado = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'recibido').reduce((s, p) => s + p.importe, 0)
   const pendiente = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
   const eb = ESTADO_CFG[a.estado || 'activo']
+  const tareas = ((data.tareas && data.tareas[alumnoId]) || []).slice().sort((x, y) => y.fecha.localeCompare(x.fecha))
 
   return (
     <Modal open={open}>
@@ -44,6 +45,23 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
         <div className="rcard"><div className="rl">Cobrado</div><div className="rv green">{fmt(cobrado)}</div></div>
         <div className="rcard"><div className="rl">Pendiente</div><div className="rv red">{fmt(pendiente)}</div></div>
       </div>
+
+      {tareas.length ? (
+        <div style={{ marginBottom: 14 }}>
+          <div className="sec-label">Tareas pendientes</div>
+          {tareas.map(t => (
+            <div key={t.id} className="tarea-perfil-item">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{t.tarea}</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+                  {new Date(t.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+              {t.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>{t.evento}</div> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <button className="btn-primary" onClick={() => onEditar(a.id)}>Editar datos</button>
       <button className="btn-secondary" onClick={onClose}>Cerrar</button>

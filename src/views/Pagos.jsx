@@ -4,9 +4,9 @@ import { MODALIDAD_CFG } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
 import { getPendientesDetalle, getClasesExtraDetalle } from '../utils/business'
 
-export default function Pagos({ data, registrarPago, eliminarPago, showToast, onAbrirWhatsapp }) {
+export default function Pagos({ data, registrarPago, eliminarPago, showToast, onAbrirWhatsapp, preselectAlumnoId }) {
   const { alumnos } = data
-  const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
+  const [alumnoId, setAlumnoId] = useState(preselectAlumnoId || alumnos[0]?.id || '')
   const [tipo, setTipo] = useState('recibido')
   const [importe, setImporte] = useState('')
   const [concepto, setConcepto] = useState('')

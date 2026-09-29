@@ -2,8 +2,9 @@ import { useState, useRef } from 'react'
 import { DIAS_ES, MESES, TURNOS, FEST_CFG, LOGO_DATA_URI } from '../utils/constants'
 import { todayStr, initials, alumnoColor, getWeekDates } from '../utils/helpers'
 import { getAlertas } from '../utils/business'
+import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
 
-export default function Inicio({ data, esFestivo, registrarSesion, showToast, onGoTab, onNuevoAlumno, onVerAlertas }) {
+export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, showToast, onGoTab, onIrAPago, onNuevoAlumno, onVerAlertas }) {
   const hoy = new Date()
   const hoyISO = todayStr()
   const dsHoy = hoy.getDay()
@@ -11,6 +12,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
 
   const [weekOffset, setWeekOffset] = useState(0)
   const [selectedIdx, setSelectedIdx] = useState(dsHoy === 0 ? 6 : dsHoy - 1)
+  const [expandedId, setExpandedId] = useState(null)
   const touchX = useRef(null)
 
   const sem = getWeekDates(weekOffset)
@@ -141,9 +143,10 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
         const idx = data.alumnos.indexOf(a)
         const sesH = data.sesiones.find(s => s.alumnoId === a.id && s.fecha === selISO)
         const tc = a.hora === '17:00' ? { border: 'rgba(77,159,255,0.5)', text: '#4d9fff' } : a.hora === '18:30' ? { border: 'rgba(251,146,60,0.5)', text: '#fb923c' } : { border: 'rgba(255,255,255,0.15)', text: 'rgba(255,255,255,0.7)' }
+        const expanded = expandedId === a.id
         return (
           <div className="card" key={a.id} style={{ borderLeft: '3px solid ' + tc.border }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setExpandedId(expanded ? null : a.id)}>
               <div className="avatar" style={{ width: 36, height: 36, fontSize: 12, borderRadius: 10, background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{a.nombre}</div>
@@ -151,10 +154,32 @@ export default function Inicio({ data, esFestivo, registrarSesion, showToast, on
                   {a.curso || ''}{a.hora ? <> · <span style={{ color: tc.text }}>{TURNOS[a.hora] || a.hora}</span></> : null}
                 </div>
               </div>
-              {sesH
-                ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span>
-                : <button onClick={() => regDesdeInicio(a.id)} style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#1a4fd6,#2563eb)', color: '#fff', fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Registrar</button>}
+              {sesH ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span> : null}
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
             </div>
+
+            {expanded ? (
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="mini-hero">
+                  <div className="mini-hero-label">Asistencia</div>
+                  {sesH ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Presente' : sesH.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada'}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Ya registrada</span>
+                    </div>
+                  ) : (
+                    <button className="btn-primary" onClick={() => regDesdeInicio(a.id)}>Confirmar asistencia</button>
+                  )}
+                </div>
+
+                <div className="mini-hero mini-hero-click" onClick={() => onIrAPago(a.id)}>
+                  <div className="mini-hero-label">Pago</div>
+                  <div style={{ fontSize: 12, color: '#a78bfa', fontWeight: 700 }}>Ir a la ficha de pagos →</div>
+                </div>
+
+                <TareaPendienteHero alumnoId={a.id} onGuardar={guardarTarea} showToast={showToast} />
+              </div>
+            ) : null}
           </div>
         )
       }) : <div className="empty">No hay clases programadas ese día</div>}

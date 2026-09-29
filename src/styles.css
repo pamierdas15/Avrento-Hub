@@ -157,7 +157,14 @@ textarea{height:70px;resize:none}
 .cal-hero-event .ev-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .cal-hero-event .ev-hora{font-size:9.5px;font-weight:400;opacity:0.7}
 
-/* ---- Tareas pendientes (Asistencia) ---- */
-.tarea-card{margin-bottom:10px}
-.tarea-textarea{font-family:'Work Sans',sans-serif;font-size:13px;min-height:64px}
-.tarea-fecha{font-size:10px;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em}
+/* ---- Heroes desplegables (Inicio → alumno de la clase) ---- */
+.mini-hero{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px}
+.mini-hero-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
+.mini-hero .inp-row{margin-bottom:8px}
+.mini-hero .btn-primary{margin-top:2px}
+.mini-hero-click{cursor:pointer}
+.mini-hero-click:active{background:rgba(255,255,255,0.07)}
+
+/* ---- Tareas pendientes en el perfil del alumno (DetalleModal) ---- */
+.tarea-perfil-item{padding:8px 0;border-bottom:1px solid var(--line)}
+.tarea-perfil-item:last-child{border-bottom:none}

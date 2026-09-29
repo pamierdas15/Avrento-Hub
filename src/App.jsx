@@ -41,6 +41,13 @@ export default function App() {
   // Modal: whatsapp
   const [waOpen, setWaOpen] = useState(false)
 
+  // Alumno a preseleccionar al entrar en Pagos desde el hero de Inicio
+  const [pagosPreselect, setPagosPreselect] = useState(null)
+
+  useEffect(() => {
+    if (tab !== 'pagos') setPagosPreselect(null)
+  }, [tab])
+
   useEffect(() => {
     // Alerta automática al entrar (equivalente a checkAlertas() original)
     const alertas = getAlertas(data)
@@ -99,6 +106,11 @@ export default function App() {
 
   const alertasActuales = getAlertas(data)
 
+  function irAPago(alumnoId) {
+    setPagosPreselect(alumnoId)
+    setTab('pagos')
+  }
+
   function renderView() {
     switch (tab) {
       case 'inicio':
@@ -107,8 +119,10 @@ export default function App() {
             data={data}
             esFestivo={esFestivo}
             registrarSesion={store.registrarSesion}
+            guardarTarea={store.guardarTarea}
             showToast={showToast}
             onGoTab={setTab}
+            onIrAPago={irAPago}
             onNuevoAlumno={abrirNuevoAlumno}
             onVerAlertas={() => setAlertasOpen(true)}
           />
@@ -122,12 +136,20 @@ export default function App() {
             esFestivo={esFestivo}
             registrarSesion={store.registrarSesion}
             eliminarSesion={store.eliminarSesion}
-            guardarTarea={store.guardarTarea}
             showToast={showToast}
           />
         )
       case 'pagos':
-        return <Pagos data={data} registrarPago={store.registrarPago} eliminarPago={store.eliminarPago} showToast={showToast} onAbrirWhatsapp={() => setWaOpen(true)} />
+        return (
+          <Pagos
+            data={data}
+            registrarPago={store.registrarPago}
+            eliminarPago={store.eliminarPago}
+            showToast={showToast}
+            onAbrirWhatsapp={() => setWaOpen(true)}
+            preselectAlumnoId={pagosPreselect}
+          />
+        )
       case 'resumen':
         return <Resumen data={data} onAbrirBackup={() => setBackupOpen(true)} showToast={showToast} />
       default:
