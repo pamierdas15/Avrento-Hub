@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import ScreenHeader from '../components/ScreenHeader.jsx'
 import { ESTADO_CFG, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { initials, alumnoColor, fmt } from '../utils/helpers'
 
@@ -16,7 +15,6 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
 
   return (
     <div className="section-pad">
-      <ScreenHeader title="Alumnos" />
       <button onClick={onNuevoAlumno} className="btn-primary" style={{ marginTop: 0, marginBottom: 12 }}>Nuevo Alumno</button>
       <div style={{ position: 'relative', marginBottom: 12 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import ScreenHeader from '../components/ScreenHeader.jsx'
 import CalendarioHero from '../components/CalendarioHero.jsx'
 import { todayStr } from '../utils/helpers'
 
@@ -19,8 +18,6 @@ export default function Asistencia({ data, esFestivo, registrarSesion, eliminarS
 
   return (
     <div className="section-pad">
-      <ScreenHeader title="Asistencia" />
-
       <div className="sec-label">Calendario</div>
       <CalendarioHero data={data} esFestivo={esFestivo} />
 

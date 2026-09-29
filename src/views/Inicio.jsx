@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { DIAS_ES, MESES, TURNOS, FEST_CFG, LOGO_DATA_URI } from '../utils/constants'
+import { DIAS_ES, MESES, TURNOS, FEST_CFG } from '../utils/constants'
 import { todayStr, initials, alumnoColor, getWeekDates } from '../utils/helpers'
 import { getAlertas } from '../utils/business'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
@@ -54,10 +54,6 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
 
   return (
     <div className="section-pad">
-      <div className="app-header">
-        <img src={LOGO_DATA_URI} className="logo-img" alt="AvrentoHub" />
-        <div className="logo-text"><span className="logo-avrento">Avrento</span><span className="logo-hub">Hub</span></div>
-      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 18 }}>
         <button className="quick-btn" onClick={onNuevoAlumno}>
           <div className="qico" style={{ background: 'rgba(37,99,235,0.2)' }}>

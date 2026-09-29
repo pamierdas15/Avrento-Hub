@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import AppHeader from './components/AppHeader.jsx'
 import TabBar from './components/TabBar.jsx'
 import Toast from './components/Toast.jsx'
 import Inicio from './views/Inicio.jsx'
@@ -159,9 +160,19 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="views-wrap">
-        <div className="view on">{renderView()}</div>
-      </div>
+      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+        <defs>
+          <clipPath id="tab-notch-clip" clipPathUnits="objectBoundingBox">
+            <path d="M0,0 H0.3875 C0.4375,0 0.445,0.42 0.5,0.42 C0.555,0.42 0.5625,0 0.6125,0 H1 V1 H0 Z" />
+          </clipPath>
+          <clipPath id="header-notch-clip" clipPathUnits="objectBoundingBox">
+            <path d="M0,0 H1 V1 H0.6125 C0.5625,1 0.555,0.58 0.5,0.58 C0.445,0.58 0.4375,1 0.3875,1 H0 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+
+      <AppHeader tab={tab} />
+      <div className="tab-content">{renderView()}</div>
       <TabBar active={tab} onChange={setTab} />
 
       <AlumnoModal

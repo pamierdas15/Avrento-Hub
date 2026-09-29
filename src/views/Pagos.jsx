@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import ScreenHeader from '../components/ScreenHeader.jsx'
 import { MODALIDAD_CFG } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
 import { getPendientesDetalle, getClasesExtraDetalle } from '../utils/business'
@@ -49,7 +48,6 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
 
   return (
     <div className="section-pad">
-      <ScreenHeader title="Pagos" />
       <div className="inp-row">
         <label className="inp-label">Alumno</label>
         <select value={alumnoId} onChange={e => setAlumnoId(e.target.value)}>
