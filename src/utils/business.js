@@ -47,8 +47,14 @@ function pendientesMensuales(d, alumno) {
   while ((y < limitY || (y === limitY && m <= limitM)) && guard < 24) {
     const esMesActual = y === limitY && m === limitM
     if (!esMesActual || incluyeMesActual) {
+      const clave = `${y}-${String(m + 1).padStart(2, '0')}`
+      // Un mes se considera cobrado si existe un pago "recibido" cuyo mes
+      // correspondiente coincide con este periodo. Para pagos antiguos sin
+      // ese dato (guardados antes de que existiera el campo), se recurre a
+      // la fecha real del pago como alternativa.
       const ok = d.pagos.some(p => {
         if (p.alumnoId !== alumno.id || p.tipo !== 'recibido') return false
+        if (p.mesCorrespondiente) return p.mesCorrespondiente === clave
         const f = new Date(p.fecha + 'T12:00:00')
         return f.getFullYear() === y && f.getMonth() === m
       })
