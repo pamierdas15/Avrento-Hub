@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ESTADO_CFG, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { initials, alumnoColor, fmt } from '../utils/helpers'
+import { getClasesPackInfo } from '../utils/business'
 
 export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
   const [termino, setTermino] = useState('')
@@ -28,6 +29,7 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
           : lista.map(a => {
             const idx = alumnos.indexOf(a)
             const eb = ESTADO_CFG[a.estado || 'activo']
+            const pack = getClasesPackInfo(data, a)
             return (
               <div className="card" key={a.id} onClick={() => onVerDetalle(a.id)} style={a.estado === 'baja' ? { opacity: 0.45 } : undefined}>
                 <div className="card-row">
@@ -48,6 +50,7 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
                     <span className={'badge ' + MODALIDAD_CFG[a.modalidad || 'fija'].badgeClass}>{MODALIDAD_CFG[a.modalidad || 'fija'].label}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#4d9fff' }}>{fmt(a[MODALIDAD_CFG[a.modalidad || 'fija'].campo]) + MODALIDAD_CFG[a.modalidad || 'fija'].suffix}</span>
+                    {pack ? <span style={{ fontSize: 10, fontWeight: 700, color: '#2dd4bf' }}>{pack.restantes}/{pack.total} clases</span> : null}
                   </div>
                 </div>
               </div>

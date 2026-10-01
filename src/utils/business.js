@@ -1,5 +1,5 @@
 import { fmt, todayStr } from './helpers'
-import { MESES } from './constants'
+import { MESES, CLASES_POR_PACK } from './constants'
 
 function inicioSemana(d) {
   const dd = new Date(d)
@@ -9,18 +9,12 @@ function inicioSemana(d) {
   return dd
 }
 
-function pagoEnRango(pagos, alumnoId, desde, hasta) {
-  return pagos.some(p => {
-    if (p.alumnoId !== alumnoId || p.tipo !== 'recibido') return false
-    const f = new Date(p.fecha + 'T12:00:00')
-    return f >= desde && f <= hasta
-  })
-}
-
-// Fecha desde la que cuenta el conteo de pendientes: la de alta, o la de la
-// última reactivación si el alumno estuvo pausado/de baja y volvió a activo.
+// Fecha desde la que cuenta el conteo de pendientes: siempre la fecha de alta
+// del alumno (se actualiza también al reactivar desde pausado/baja). Se
+// mantiene "activoDesde" como alternativa solo por compatibilidad con datos
+// guardados antes de este cambio.
 function inicioConteo(alumno) {
-  return alumno.activoDesde || alumno.alta || todayStr()
+  return alumno.alta || alumno.activoDesde || todayStr()
 }
 
 // Sesiones "presente" cuya fecha ya ha pasado (no cuentan las de hoy ni futuras)
@@ -75,34 +69,49 @@ function pendientesMensuales(d, alumno) {
   return out
 }
 
-function pendientesSemanales(d, alumno) {
+// Nº de clases "presente" consumidas desde el inicio del conteo vigente.
+// A diferencia de sesionesPasadas, incluye también la clase de hoy (el
+// contador debe descontar en el momento en que se registra la asistencia).
+function clasesConsumidasPack(d, alumno) {
+  const desde = inicioConteo(alumno)
+  return d.sesiones.filter(s => s.alumnoId === alumno.id && s.estado === 'presente' && s.fecha >= desde).length
+}
+
+// Pack Clases: bloque prepagado de CLASES_POR_PACK clases. Cada vez que las
+// clases consumidas superan los packs ya pagados, se genera un nuevo pack
+// pendiente de cobro.
+function pendientesPack(d, alumno) {
   if (conteoParalizado(alumno)) return []
-  const hoy = new Date()
-  const hoyLunes = inicioSemana(hoy)
-  const ultimoLunes = new Date(hoyLunes); ultimoLunes.setDate(hoyLunes.getDate() - 7)
-  let inicio = inicioSemana(new Date(inicioConteo(alumno) + 'T12:00:00'))
-  const maxLookbackMs = 12 * 7 * 24 * 60 * 60 * 1000
-  if (ultimoLunes - inicio > maxLookbackMs) inicio = new Date(ultimoLunes.getTime() - maxLookbackMs)
+  const desde = inicioConteo(alumno)
+  const consumidas = clasesConsumidasPack(d, alumno)
+  const packsNecesarios = Math.ceil(consumidas / CLASES_POR_PACK)
+  const totalPagado = d.pagos
+    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde)
+    .reduce((s, p) => s + p.importe, 0)
+  const packsPagados = alumno.precioPack > 0 ? Math.floor(totalPagado / alumno.precioPack) : 0
+  const pend = packsNecesarios - packsPagados
+  if (pend <= 0) return []
   const out = []
-  let cursor = new Date(inicio)
-  let guard = 0
-  while (cursor <= ultimoLunes && guard < 20) {
-    const domingo = new Date(cursor); domingo.setDate(cursor.getDate() + 6); domingo.setHours(23, 59, 59, 999)
-    const ok = pagoEnRango(d.pagos, alumno.id, cursor, domingo)
-    if (!ok) {
-      const periodo = `la semana del ${cursor.getDate()} al ${domingo.getDate()} de ${MESES[domingo.getMonth()]}`
-      out.push({
-        value: cursor.toISOString().slice(0, 10),
-        label: `${cursor.getDate()} ${MESES[cursor.getMonth()].substring(0, 3)} — ${domingo.getDate()} ${MESES[domingo.getMonth()].substring(0, 3)} · ${fmt(alumno.precioSemana)}`,
-        importe: alumno.precioSemana,
-        periodo,
-        concepto: `Semana del ${cursor.getDate()} al ${domingo.getDate()} de ${MESES[domingo.getMonth()]}`
-      })
-    }
-    cursor = new Date(cursor); cursor.setDate(cursor.getDate() + 7)
-    guard++
+  for (let n = 1; n <= pend; n++) {
+    out.push({
+      value: 'pack-' + n,
+      label: `${n} pack${n > 1 ? 's' : ''} de ${CLASES_POR_PACK} clases · ${fmt(n * alumno.precioPack)}`,
+      importe: n * alumno.precioPack,
+      periodo: `${n} pack${n > 1 ? 's' : ''} de ${CLASES_POR_PACK} clases`,
+      concepto: `${n} pack${n > 1 ? 's' : ''} de ${CLASES_POR_PACK} clases`
+    })
   }
   return out
+}
+
+// Estado del contador de clases del pack vigente (para mostrar en el perfil
+// del alumno): cuántas clases quedan dentro del bloque de 6 actualmente en curso.
+export function getClasesPackInfo(d, alumno) {
+  if (!alumno || alumno.modalidad !== 'pack') return null
+  const consumidas = clasesConsumidasPack(d, alumno)
+  const enPackActual = consumidas % CLASES_POR_PACK
+  const restantes = enPackActual === 0 ? CLASES_POR_PACK : CLASES_POR_PACK - enPackActual
+  return { consumidas, restantes, total: CLASES_POR_PACK }
 }
 
 function pendientesSesiones(d, alumno) {
@@ -193,7 +202,7 @@ function getResumenClasesExtra(d, alumno) {
 export function getPendientesDetalle(d, alumno) {
   if (!alumno) return []
   if (alumno.modalidad === 'fija') return pendientesMensuales(d, alumno)
-  if (alumno.modalidad === 'semana') return pendientesSemanales(d, alumno)
+  if (alumno.modalidad === 'pack') return pendientesPack(d, alumno)
   return pendientesSesiones(d, alumno)
 }
 
@@ -213,8 +222,8 @@ export function getResumenPendiente(d, alumno) {
     }
     return { count: items.length + extra.count, importe, texto }
   }
-  if (alumno.modalidad === 'semana') {
-    const items = pendientesSemanales(d, alumno)
+  if (alumno.modalidad === 'pack') {
+    const items = pendientesPack(d, alumno)
     const importe = items.reduce((s, it) => s + it.importe, 0)
     const texto = items.map(it => it.periodo).join(' y ')
     return { count: items.length, importe, texto }

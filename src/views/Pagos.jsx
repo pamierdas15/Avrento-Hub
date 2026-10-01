@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { MODALIDAD_CFG } from '../utils/constants'
+import { MODALIDAD_CFG, MESES } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
 import { getPendientesDetalle, getClasesExtraDetalle } from '../utils/business'
+
+function capitaliza(s) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
 export default function Pagos({ data, registrarPago, eliminarPago, showToast, onAbrirWhatsapp, preselectAlumnoId }) {
   const { alumnos } = data
@@ -11,8 +13,14 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
   const [concepto, setConcepto] = useState('')
   const [fecha, setFecha] = useState(todayStr())
 
+  const hoy = new Date()
+  const [mesSel, setMesSel] = useState(hoy.getMonth())
+  const [anioSel, setAnioSel] = useState(hoy.getFullYear())
+  const aniosDisponibles = [anioSel - 1, anioSel, anioSel + 1].filter((v, i, arr) => arr.indexOf(v) === i)
+
   const alumno = alumnos.find(a => a.id === alumnoId)
   const modCfg = alumno ? MODALIDAD_CFG[alumno.modalidad || 'fija'] : null
+  const esMensual = alumno && alumno.modalidad === 'fija'
   const pendientes = alumno ? getPendientesDetalle(data, alumno) : []
   const clasesExtra = alumno ? getClasesExtraDetalle(data, alumno) : []
 
@@ -20,12 +28,24 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
     if (alumno && modCfg) setImporte(String(alumno[modCfg.campo] || ''))
   }, [alumnoId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Para modalidad mensual, el concepto se genera a partir del mes/año elegidos.
+  // Al cambiar de alumno o de modalidad, se limpia cualquier concepto anterior.
+  useEffect(() => {
+    setConcepto(esMensual ? `Mensualidad de ${MESES[mesSel]} ${anioSel}` : '')
+  }, [alumnoId, esMensual, mesSel, anioSel])
+
   function aplicarPendiente(value) {
     const item = pendientes.find(p => p.value === value)
     if (!item) return
     setImporte(String(item.importe))
     setConcepto(item.concepto)
     setTipo('recibido')
+    // Si el pendiente es mensual, su value viene como "YYYY-MM": sincroniza los selects
+    if (esMensual && /^\d{4}-\d{2}$/.test(value)) {
+      const [y, m] = value.split('-').map(Number)
+      setAnioSel(y)
+      setMesSel(m - 1)
+    }
   }
 
   function aplicarClaseExtra(value) {
@@ -39,8 +59,10 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
   function guardar() {
     const imp = parseFloat(importe)
     if (!alumnoId || !imp || !fecha) { showToast('Rellena todos los campos'); return }
-    registrarPago({ alumnoId, importe: +imp.toFixed(2), concepto: concepto.trim() || 'Pago', fecha, tipo })
-    setConcepto('')
+    const pago = { alumnoId, importe: +imp.toFixed(2), concepto: concepto.trim() || 'Pago', fecha, tipo }
+    if (esMensual) pago.mesCorrespondiente = `${anioSel}-${String(mesSel + 1).padStart(2, '0')}`
+    registrarPago(pago)
+    if (!esMensual) setConcepto('')
     showToast('Pago registrado')
   }
 
@@ -108,10 +130,24 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, on
         </div>
       ) : null}
 
-      <div className="inp-row">
-        <label className="inp-label">Concepto</label>
-        <input type="text" placeholder="Ej: Mensualidad junio..." value={concepto} onChange={e => setConcepto(e.target.value)} />
-      </div>
+      {esMensual ? (
+        <div className="inp-row">
+          <label className="inp-label">Mensualidad correspondiente</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <select value={mesSel} onChange={e => setMesSel(parseInt(e.target.value))} style={{ flex: 2 }}>
+              {MESES.map((m, i) => <option value={i} key={i}>{capitaliza(m)}</option>)}
+            </select>
+            <select value={anioSel} onChange={e => setAnioSel(parseInt(e.target.value))} style={{ flex: 1 }}>
+              {aniosDisponibles.map(y => <option value={y} key={y}>{y}</option>)}
+            </select>
+          </div>
+        </div>
+      ) : (
+        <div className="inp-row">
+          <label className="inp-label">Concepto</label>
+          <input type="text" placeholder="Ej: Clase particular..." value={concepto} onChange={e => setConcepto(e.target.value)} />
+        </div>
+      )}
       <div className="inp-row">
         <label className="inp-label">Fecha</label>
         <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} />

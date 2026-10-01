@@ -1,6 +1,7 @@
 import Modal from '../Modal.jsx'
 import { ESTADO_CFG, MODALIDAD_CFG } from '../../utils/constants'
 import { initials, alumnoColor, fmt } from '../../utils/helpers'
+import { getClasesPackInfo } from '../../utils/business'
 
 export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }) {
   if (!open || !alumnoId) return <Modal open={open}><button className="btn-secondary" onClick={onClose}>Cerrar</button></Modal>
@@ -16,6 +17,7 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
   const pendiente = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
   const eb = ESTADO_CFG[a.estado || 'activo']
   const tareas = ((data.tareas && data.tareas[alumnoId]) || []).slice().sort((x, y) => y.fecha.localeCompare(x.fecha))
+  const pack = getClasesPackInfo(data, a)
 
   return (
     <Modal open={open}>
@@ -45,6 +47,13 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
         <div className="rcard"><div className="rl">Cobrado</div><div className="rv green">{fmt(cobrado)}</div></div>
         <div className="rcard"><div className="rl">Pendiente</div><div className="rv red">{fmt(pendiente)}</div></div>
       </div>
+
+      {pack ? (
+        <div className="rcard" style={{ marginBottom: 14, borderColor: 'rgba(45,212,191,0.3)' }}>
+          <div className="rl">Pack de clases</div>
+          <div className="rv" style={{ color: '#2dd4bf' }}>{pack.restantes}/{pack.total} clases restantes</div>
+        </div>
+      ) : null}
 
       {tareas.length ? (
         <div style={{ marginBottom: 14 }}>

@@ -12,7 +12,7 @@ const CLASES_SEMANALES_OPCIONES = [1, 2, 3, 4, 5, 6]
 
 const BLANK = {
   id: '', nombre: '', curso: '1º ESO', materia: '', estado: 'activo', alta: todayStr(),
-  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioSemana: '', precioSesion: '',
+  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioPack: '', precioSesion: '',
   clasesSemanales: 0, notas: ''
 }
 
@@ -33,23 +33,22 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
   function guardar() {
     if (!form.nombre.trim()) { showToast('Introduce el nombre'); return }
+    // Al reactivar un alumno pausado/de baja, su fecha de alta se actualiza a
+    // hoy: los pagos pendientes se cuentan siempre desde la fecha de alta.
     const reactivando = form.estado === 'activo' && editing && editing.estado !== 'activo'
-    const activoDesde = reactivando
-      ? todayStr()
-      : (editing?.activoDesde || form.alta || todayStr())
+    const alta = reactivando ? todayStr() : form.alta
     onSave({
       id: form.id || Date.now().toString(),
       nombre: form.nombre.trim(),
       curso: form.curso,
       materia: form.materia.trim(),
       estado: form.estado,
-      alta: form.alta,
-      activoDesde,
+      alta,
       dias: form.dias,
       hora: form.hora,
       modalidad: form.modalidad,
       tarifa: parseFloat(form.tarifa) || 0,
-      precioSemana: parseFloat(form.precioSemana) || 0,
+      precioPack: parseFloat(form.precioPack) || 0,
       precioSesion: parseFloat(form.precioSesion) || 0,
       clasesSemanales: form.modalidad === 'fija' ? (parseInt(form.clasesSemanales) || 0) : 0,
       notas: form.notas.trim()
@@ -108,6 +107,9 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       <div className="inp-row">
         <label className="inp-label">Fecha de alta</label>
         <input type="date" value={form.alta} onChange={e => set('alta', e.target.value)} />
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+          Los pagos pendientes se calculan siempre desde esta fecha.
+        </div>
       </div>
 
       <div className="inp-row">
@@ -132,7 +134,7 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
         <label className="inp-label">Modalidad de pago</label>
         <select value={form.modalidad} onChange={e => set('modalidad', e.target.value)}>
           <option value="fija">{MODALIDAD_CFG.fija.selectLabel}</option>
-          <option value="semana">{MODALIDAD_CFG.semana.selectLabel}</option>
+          <option value="pack">{MODALIDAD_CFG.pack.selectLabel}</option>
           <option value="sesion">{MODALIDAD_CFG.sesion.selectLabel}</option>
         </select>
       </div>

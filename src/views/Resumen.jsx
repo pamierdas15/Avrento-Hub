@@ -2,6 +2,15 @@ import * as XLSX from 'xlsx'
 import { DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { fmt, alumnoColor, initials, todayStr } from '../utils/helpers'
 
+// Clave de mes ("YYYY-MM") a la que se acumula un pago: si el pago es de un
+// alumno mensual, el mes que el propio pago indica como "correspondiente"
+// (puede diferir de la fecha real en que se cobró); el resto, por su fecha.
+function mesClaveDePago(p) {
+  if (p.mesCorrespondiente) return p.mesCorrespondiente
+  const f = new Date(p.fecha + 'T12:00:00')
+  return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`
+}
+
 export default function Resumen({ data, onAbrirBackup, showToast }) {
   const hoy = new Date(), mes = hoy.getMonth(), anyo = hoy.getFullYear()
   const cobradoMes = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'recibido' && f.getMonth() === mes && f.getFullYear() === anyo }).reduce((s, p) => s + p.importe, 0)
@@ -11,7 +20,7 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
   const mesLabel = hoy.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
 
   const mesesSet = new Set([`${anyo}-${String(mes + 1).padStart(2, '0')}`])
-  data.pagos.forEach(p => { const f = new Date(p.fecha + 'T12:00:00'); mesesSet.add(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`) })
+  data.pagos.forEach(p => mesesSet.add(mesClaveDePago(p)))
 
   function exportExcel() {
     if (!data.alumnos.length) { showToast('No hay datos para exportar'); return }
@@ -40,11 +49,11 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(paR.length ? paR : [{ 'Alumno': 'Sin datos', 'Fecha': '', 'Concepto': '', 'Tipo': '', 'Importe (€)': 0 }]), 'Pagos')
 
     const mS = new Set()
-    data.pagos.forEach(p => { const f = new Date(p.fecha + 'T12:00:00'); mS.add(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`) })
+    data.pagos.forEach(p => mS.add(mesClaveDePago(p)))
     const rR = [...mS].sort().map(mk => {
       const [ay, am] = mk.split('-').map(Number)
-      const cob = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'recibido' && f.getMonth() === am - 1 && f.getFullYear() === ay }).reduce((s, p) => s + p.importe, 0)
-      const pen = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'pendiente' && f.getMonth() === am - 1 && f.getFullYear() === ay }).reduce((s, p) => s + p.importe, 0)
+      const cob = data.pagos.filter(p => p.tipo === 'recibido' && mesClaveDePago(p) === mk).reduce((s, p) => s + p.importe, 0)
+      const pen = data.pagos.filter(p => p.tipo === 'pendiente' && mesClaveDePago(p) === mk).reduce((s, p) => s + p.importe, 0)
       return { 'Mes': new Date(ay, am - 1, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }), 'Cobrado (€)': cob, 'Pendiente (€)': pen, 'Balance (€)': cob - pen }
     })
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rR.length ? rR : [{ 'Mes': 'Sin datos', 'Cobrado (€)': 0, 'Pendiente (€)': 0, 'Balance (€)': 0 }]), 'Resumen mensual')
@@ -78,8 +87,8 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
         const [ay, am] = mk.split('-').map(Number)
         const esA = am - 1 === mes && ay === anyo
         const label = new Date(ay, am - 1, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
-        const cob = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'recibido' && f.getMonth() === am - 1 && f.getFullYear() === ay }).reduce((s, p) => s + p.importe, 0)
-        const pen = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'pendiente' && f.getMonth() === am - 1 && f.getFullYear() === ay }).reduce((s, p) => s + p.importe, 0)
+        const cob = data.pagos.filter(p => p.tipo === 'recibido' && mesClaveDePago(p) === mk).reduce((s, p) => s + p.importe, 0)
+        const pen = data.pagos.filter(p => p.tipo === 'pendiente' && mesClaveDePago(p) === mk).reduce((s, p) => s + p.importe, 0)
         return (
           <div className="card" key={mk} style={esA ? { borderColor: 'rgba(77,159,255,0.3)', background: 'rgba(37,99,235,0.08)' } : undefined}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', textTransform: 'capitalize' }}>

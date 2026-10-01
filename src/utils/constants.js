@@ -38,16 +38,19 @@ export const FTIPO_BTN_CFG = {
 // Placeholders disponibles en las tres: {nombre}, {importe}, {pendientes}
 export const WA_DEFAULTS = {
   fija: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el mes de {pendientes}, con un importe de {importe}. Gracias de antemano.',
-  semana: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el importe de {importe}, que corresponde a {pendientes}. Gracias de antemano.',
+  pack: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago un nuevo pack de clases, que corresponde a {pendientes}, con un importe de {importe}. Gracias de antemano.',
   sesion: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el importe de {importe}, que corresponde a {pendientes}. Gracias de antemano.'
 }
 
 // Modalidades de pago disponibles para un alumno
 export const MODALIDAD_CFG = {
   fija: { label: 'Mensual', badgeClass: 'badge-fija', suffix: '/mes', campo: 'tarifa', tarifaLabel: 'Tarifa mensual (€)', selectLabel: 'Pago mensual' },
-  semana: { label: 'Semanal', badgeClass: 'badge-semana', suffix: '/sem.', campo: 'precioSemana', tarifaLabel: 'Tarifa semanal (€)', selectLabel: 'Pago semana' },
+  pack: { label: 'Pack Clases', badgeClass: 'badge-pack', suffix: '/pack', campo: 'precioPack', tarifaLabel: 'Precio del pack de 6 clases (€)', selectLabel: 'Pack Clases' },
   sesion: { label: 'Por sesión', badgeClass: 'badge-sesion', suffix: '/ses.', campo: 'precioSesion', tarifaLabel: 'Precio por sesión (€)', selectLabel: 'Pago por sesión' }
 }
+
+// Nº de clases que incluye cada pack prepagado
+export const CLASES_POR_PACK = 6
 
 // En el proyecto Vite esto apunta al icono real servido desde /public.
 // En el artifact consolidado este valor se sustituye por un data URI en base64.
