@@ -62,13 +62,17 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
         <input type="text" placeholder="Buscar alumno..." value={termino} onChange={e => setTermino(e.target.value)} style={{ paddingLeft: 34 }} />
       </div>
 
-      <div className="mini-hero" style={{ marginBottom: 12 }}>
-        <div className="mini-hero-label mini-hero-toggle" onClick={() => setActivosOpen(o => !o)}>
-          <span>🟢 Alumnos Activos ({activos.length})</span>
-          <span style={{ transform: activosOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+      <div className="section-hero">
+        <div className="section-hero-header" onClick={() => setActivosOpen(o => !o)}>
+          <div className="section-hero-left">
+            <div className="section-hero-icon green">✓</div>
+            <div className="section-hero-title">Alumnos Activos</div>
+            <span className="section-hero-count">{activos.length}</span>
+          </div>
+          <div className="section-hero-toggle" style={{ transform: activosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
         </div>
         {activosOpen ? (
-          <div style={{ marginTop: 8 }}>
+          <div className="section-hero-body">
             {!activos.length
               ? <p className="empty">Sin alumnos activos.</p>
               : activos.map(a => <AlumnoCard key={a.id} a={a} idx={alumnos.indexOf(a)} data={data} onVerDetalle={onVerDetalle} />)}
@@ -76,13 +80,17 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
         ) : null}
       </div>
 
-      <div className="mini-hero" style={{ marginBottom: 12 }}>
-        <div className="mini-hero-label mini-hero-toggle" onClick={() => setTareasOpen(o => !o)}>
-          <span>📝 Tareas ({tareas.length})</span>
-          <span style={{ transform: tareasOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+      <div className="section-hero">
+        <div className="section-hero-header" onClick={() => setTareasOpen(o => !o)}>
+          <div className="section-hero-left">
+            <div className="section-hero-icon purple">📝</div>
+            <div className="section-hero-title">Tareas</div>
+            <span className="section-hero-count">{tareas.length}</span>
+          </div>
+          <div className="section-hero-toggle" style={{ transform: tareasOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
         </div>
         {tareasOpen ? (
-          <div style={{ marginTop: 8 }}>
+          <div className="section-hero-body">
             {!tareas.length
               ? <p className="empty">Sin tareas registradas.</p>
               : tareas.map(tt => {
