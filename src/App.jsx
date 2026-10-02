@@ -15,7 +15,7 @@ import WhatsappModal from './components/modals/WhatsappModal.jsx'
 import ConfirmacionPagoModal from './components/modals/ConfirmacionPagoModal.jsx'
 import { useAppData } from './hooks/useAppData.js'
 import { useToast } from './hooks/useToast.js'
-import { getAlertas } from './utils/business.js'
+import { getAlertas, getTareasPendientes } from './utils/business.js'
 import { BACKUP_SK, AUTO_BACKUP_SK } from './utils/constants.js'
 import { descargarBackup } from './utils/backup.js'
 import { todayStr } from './utils/helpers.js'
@@ -34,8 +34,9 @@ export default function App() {
   // Modal: detalle
   const [detalleId, setDetalleId] = useState(null)
 
-  // Modal: alertas
-  const [alertasOpen, setAlertasOpen] = useState(false)
+  // Modal: alertas (vistazo rápido). null = cerrado, 'pagos' o 'tareas'.
+  // Solo se abre al pulsar el aviso correspondiente en Inicio.
+  const [alertasTipo, setAlertasTipo] = useState(null)
 
   // Modal: backup
   const [backupOpen, setBackupOpen] = useState(false)
@@ -55,10 +56,6 @@ export default function App() {
   }, [tab])
 
   useEffect(() => {
-    // Alerta automática al entrar (equivalente a checkAlertas() original)
-    const alertas = getAlertas(data)
-    if (alertas.length) setAlertasOpen(true)
-
     // Pide al navegador almacenamiento "persistente": reduce el riesgo de que
     // borre los datos del sitio automáticamente por falta de espacio.
     if (navigator.storage && navigator.storage.persist) {
@@ -111,6 +108,7 @@ export default function App() {
   }
 
   const alertasActuales = getAlertas(data)
+  const tareasActuales = getTareasPendientes(data)
 
   function irAPago(alumnoId) {
     setPagosPreselect(alumnoId)
@@ -128,9 +126,9 @@ export default function App() {
             guardarTarea={store.guardarTarea}
             guardarEvento={store.guardarEvento}
             showToast={showToast}
-            onGoTab={setTab}
             onIrAPago={irAPago}
-            onVerAlertas={() => setAlertasOpen(true)}
+            onVerAlertas={() => setAlertasTipo('pagos')}
+            onVerTareas={() => setAlertasTipo('tareas')}
           />
         )
       case 'alumnos':
@@ -215,7 +213,12 @@ export default function App() {
         onEditar={abrirEditarAlumno}
       />
 
-      <AlertasModal open={alertasOpen} alertas={alertasActuales} onClose={() => setAlertasOpen(false)} />
+      <AlertasModal
+        tipo={alertasTipo}
+        alertas={alertasActuales}
+        tareas={tareasActuales}
+        onClose={() => setAlertasTipo(null)}
+      />
 
       <BackupModal
         open={backupOpen}

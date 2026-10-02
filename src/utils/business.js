@@ -390,3 +390,13 @@ export function formatoMensualidadPago(pago) {
   }
   return pago.concepto || ''
 }
+
+// Tareas sin marcar como realizadas, de todos los alumnos, de la más antigua a
+// la más reciente (aviso de Inicio y su ventana de vistazo rápido).
+export function getTareasPendientes(d) {
+  return (d.alumnos || []).flatMap(a =>
+    ((d.tareas && d.tareas[a.id]) || [])
+      .filter(t => !t.completada)
+      .map(t => ({ ...t, alumnoId: a.id, alumnoNombre: a.nombre }))
+  ).sort((x, y) => (x.fecha || '').localeCompare(y.fecha || ''))
+}

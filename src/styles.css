@@ -382,6 +382,9 @@ textarea.plantilla-txt{height:100px;font-size:13px}
 /* ---- Alertas ---- */
 .alerta-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(251,191,36,0.08);border-radius:12px;margin-bottom:8px;border-left:3px solid #fbbf24}
 .alerta-item-ico{font-size:20px}
+.alerta-item.alerta-item-tarea{background:rgba(167,139,250,0.08);border-left-color:#a78bfa}
+.modal-ico.ico-morado{background:rgba(167,139,250,0.15)}
+.registro-fecha.vencida{color:#f87171}
 .alertas-pie{font-size:11px;color:rgba(255,255,255,0.35);text-align:center;margin-top:4px;margin-bottom:8px}
 
 /* ---- Pagos ---- */

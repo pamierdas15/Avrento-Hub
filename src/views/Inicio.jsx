@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react'
 import { DIAS_ES, MESES, TURNOS, FEST_CFG } from '../utils/constants'
 import { todayStr, isoLocal, initials, alumnoColor, getWeekDates } from '../utils/helpers'
-import { getAlertas } from '../utils/business'
+import { getAlertas, getTareasPendientes } from '../utils/business'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
 import EventoProximoHero from '../components/EventoProximoHero.jsx'
 
-export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, guardarEvento, showToast, onGoTab, onIrAPago, onVerAlertas }) {
+export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, guardarEvento, showToast, onIrAPago, onVerAlertas, onVerTareas }) {
   const hoy = new Date()
   const hoyISO = todayStr()
   const dsHoy = hoy.getDay()
@@ -13,11 +13,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
 
   // Tareas sin marcar como realizadas, de todos los alumnos, de la más
   // antigua a la más reciente. Al borrarlas o marcarlas desaparecen del aviso.
-  const tareasPendientes = data.alumnos.flatMap(a =>
-    ((data.tareas && data.tareas[a.id]) || [])
-      .filter(t => !t.completada)
-      .map(t => ({ ...t, alumnoId: a.id, alumnoNombre: a.nombre }))
-  ).sort((x, y) => (x.fecha || '').localeCompare(y.fecha || ''))
+  const tareasPendientes = getTareasPendientes(data)
 
   const [weekOffset, setWeekOffset] = useState(0)
   const [selectedIdx, setSelectedIdx] = useState(dsHoy === 0 ? 6 : dsHoy - 1)
@@ -76,7 +72,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
       ) : null}
 
       {tareasPendientes.length ? (
-        <div className="tareas-box" onClick={() => onGoTab('alumnos')}>
+        <div className="tareas-box" onClick={onVerTareas}>
           <div className="tareas-box-title">📝 {tareasPendientes.length} tarea{tareasPendientes.length > 1 ? 's' : ''} pendiente{tareasPendientes.length > 1 ? 's' : ''}</div>
           {tareasPendientes.slice(0, 3).map(t => (
             <div key={t.alumnoId + '-' + t.id} className="alerta-box-item">
