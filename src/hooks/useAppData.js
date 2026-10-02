@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SK, FES_SK } from '../utils/constants'
 import { todayStr } from '../utils/helpers'
 import { restaurarPlantillas } from '../utils/backup'
-import { migrarPagos } from '../utils/business'
+import { migrarPagos, describirCobertura } from '../utils/business'
 
 function loadData() {
   const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {} }
@@ -136,6 +136,24 @@ export function useAppData() {
     return () => cambiar(d => d.pagos.some(p => p.id === id) ? d : { ...d, pagos: [...d.pagos, pago] })
   }, [cambiar])
 
+  // Convierte un pago anotado a mano como "⏳ Pendiente" en cobrado (con
+  // fecha de hoy), calculando qué cubre igual que un pago normal.
+  const marcarPagoCobrado = useCallback((id) => {
+    const d0 = dataRef.current
+    const original = d0.pagos.find(p => p.id === id)
+    if (!original || original.tipo !== 'pendiente') return () => {}
+    const alumno = d0.alumnos.find(a => a.id === original.alumnoId)
+    const mod = (alumno && alumno.modalidad) || 'fija'
+    let cubre = mod
+    if (mod === 'fija') cubre = /clase extra/i.test(original.concepto || '') ? 'extra' : 'mes'
+    let nuevo = { ...original, tipo: 'recibido', fecha: todayStr() }
+    if (cubre === 'mes' && !nuevo.mesCorrespondiente) nuevo.mesCorrespondiente = original.fecha.slice(0, 7)
+    if (cubre !== 'mes') delete nuevo.mesCorrespondiente
+    nuevo = describirCobertura(alumno, nuevo, cubre)
+    cambiar(d => ({ ...d, pagos: d.pagos.map(p => p.id === id ? nuevo : p) }))
+    return () => cambiar(d => ({ ...d, pagos: d.pagos.map(p => p.id === id ? original : p) }))
+  }, [cambiar])
+
   // ---- Festivos ----
   const guardarFestivo = useCallback((festivo) => {
     setFestivos(f => [...f.filter(x => x.fecha !== festivo.fecha), festivo])
@@ -213,6 +231,7 @@ export function useAppData() {
     eliminarSesion,
     registrarPago,
     eliminarPago,
+    marcarPagoCobrado,
     guardarFestivo,
     eliminarFestivo,
     restaurarBackup,

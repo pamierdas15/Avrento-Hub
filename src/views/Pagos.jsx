@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { MODALIDAD_CFG, MESES } from '../utils/constants'
 import { todayStr, fmt } from '../utils/helpers'
-import { getPendientesDetalle, getClasesExtraDetalle, describirCobertura } from '../utils/business'
+import { getPendientesDetalle, getClasesExtraDetalle, getPendientesLista, describirCobertura } from '../utils/business'
 
 function capitaliza(s) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
-function SectionHero({ icon, color, title, count, open, onToggle, children }) {
+function SectionHero({ id, icon, color, title, count, open, onToggle, children }) {
   return (
-    <div className="section-hero">
+    <div className="section-hero" id={id}>
       <div className="section-hero-header" onClick={onToggle}>
         <div className="section-hero-left">
           <div className={'section-hero-icon ' + color}>{icon}</div>
@@ -21,7 +21,7 @@ function SectionHero({ icon, color, title, count, open, onToggle, children }) {
   )
 }
 
-export default function Pagos({ data, registrarPago, eliminarPago, showToast, toastDeshacer, onAbrirWhatsapp, onAbrirConfirmacion, preselectAlumnoId }) {
+export default function Pagos({ data, registrarPago, eliminarPago, marcarPagoCobrado, showToast, toastDeshacer, onAbrirWhatsapp, onAbrirConfirmacion, preselectAlumnoId }) {
   const { alumnos } = data
   const [alumnoId, setAlumnoId] = useState(preselectAlumnoId || alumnos[0]?.id || '')
   const [tipo, setTipo] = useState('recibido')
@@ -31,8 +31,9 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, to
   // Solo alumnos mensuales: qué se está cobrando, la mensualidad o clases extra
   const [modoMensual, setModoMensual] = useState('mes')
 
-  const [alumnoOpen, setAlumnoOpen] = useState(true)
-  const [registrarOpen, setRegistrarOpen] = useState(true)
+  const [alumnoOpen, setAlumnoOpen] = useState(false)
+  const [pendientesOpen, setPendientesOpen] = useState(false)
+  const [registrarOpen, setRegistrarOpen] = useState(false)
   const [historicoOpen, setHistoricoOpen] = useState(false)
   const [recordatorioOpen, setRecordatorioOpen] = useState(false)
   const [confirmacionOpen, setConfirmacionOpen] = useState(false)
@@ -49,6 +50,8 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, to
   const admiteExtra = esMensual && alumno.clasesSemanales > 0
   const pendientes = alumno ? getPendientesDetalle(data, alumno) : []
   const clasesExtra = alumno ? getClasesExtraDetalle(data, alumno) : []
+  const listaPendientes = alumno ? getPendientesLista(data, alumno) : []
+  const totalPendiente = listaPendientes.reduce((s, x) => s + x.importe, 0)
 
   useEffect(() => {
     if (alumno && modCfg) setImporte(String(alumno[modCfg.campo] || ''))
@@ -97,6 +100,28 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, to
     setTipo('recibido')
   }
 
+  // Botón "Cobrar" de una fila de Pagos Pendientes: rellena el formulario de
+  // Registrar pago con esa fila y lleva hasta él (no registra nada todavía).
+  function aplicarCobro(cobro) {
+    if (!cobro) return
+    setTipo('recibido')
+    if (cobro.modo === 'mes') {
+      setModoMensual('mes')
+      const [y, m] = cobro.mes.split('-').map(Number)
+      setAnioSel(y)
+      setMesSel(m - 1)
+    } else if (cobro.modo === 'extra') {
+      setModoMensual('extra')
+    }
+    setImporte(String(cobro.importe))
+    setConcepto(cobro.concepto)
+    setRegistrarOpen(true)
+    setTimeout(() => {
+      const el = document.getElementById('registrar-pago')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
   function guardar() {
     const imp = parseFloat(importe)
     if (!alumnoId || !imp || !fecha) { showToast('Rellena todos los campos'); return }
@@ -111,7 +136,8 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, to
     showToast('Pago registrado')
   }
 
-  const pagos = data.pagos.filter(p => p.alumnoId === alumnoId).slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
+  // El histórico muestra solo lo ya cobrado; lo pendiente está en su propio bloque.
+  const pagos = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'recibido').slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
 
   return (
     <div className="section-pad">
@@ -133,7 +159,37 @@ export default function Pagos({ data, registrarPago, eliminarPago, showToast, to
         ) : null}
       </SectionHero>
 
-      <SectionHero icon="💳" color="purple" title="Registrar Pago" open={registrarOpen} onToggle={() => setRegistrarOpen(o => !o)}>
+      <SectionHero icon="⏳" color="amber" title="Pagos Pendientes" count={listaPendientes.length} open={pendientesOpen} onToggle={() => setPendientesOpen(o => !o)}>
+        {!alumnoId ? <p className="empty">Selecciona un alumno</p> : !listaPendientes.length ? (
+          <p className="empty">✓ Sin pagos pendientes</p>
+        ) : (
+          <>
+            <div className="pend-total">
+              <span>Total pendiente</span>
+              <span className="pend-total-val">{fmt(totalPendiente)}</span>
+            </div>
+            {listaPendientes.map(it => (
+              <div className="hist-item" key={it.key}>
+                <div className="flex-1 min-w-0">
+                  <div className="txt-titulo">{it.titulo}</div>
+                  <div className="txt-sub">{it.detalle}</div>
+                </div>
+                <span className="badge badge-pend">{fmt(it.importe)}</span>
+                {it.manual ? (
+                  <>
+                    <button className="cobrar-btn" onClick={() => toastDeshacer('Marcado como cobrado', marcarPagoCobrado(it.id))}>✓ Cobrado</button>
+                    <button className="icon-btn" onClick={() => toastDeshacer('Pendiente eliminado', eliminarPago(it.id))}>✕</button>
+                  </>
+                ) : (
+                  <button className="cobrar-btn" onClick={() => aplicarCobro(it.cobro)}>Cobrar</button>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+      </SectionHero>
+
+      <SectionHero id="registrar-pago" icon="💳" color="purple" title="Registrar Pago" open={registrarOpen} onToggle={() => setRegistrarOpen(o => !o)}>
         <div className="seg">
           <button className={'seg-btn' + (tipo === 'recibido' ? ' on' : '')} onClick={() => setTipo('recibido')}>✓ Cobrado</button>
           <button className={'seg-btn' + (tipo === 'pendiente' ? ' on' : '')} onClick={() => setTipo('pendiente')}>⏳ Pendiente</button>

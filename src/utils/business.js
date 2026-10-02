@@ -189,13 +189,19 @@ function pendientesSesiones(d, alumno) {
 // semana, de las sesiones "presente" que superan el nº de clases semanales
 // incluidas en la mensualidad del alumno.
 function clasesExtraAcumuladas(d, alumno) {
-  if (!alumno.clasesSemanales || alumno.clasesSemanales <= 0) return 0
+  return clasesExtraPorSemana(d, alumno).reduce((s, w) => s + w.extra, 0)
+}
+
+// Desglose semana a semana: [{ lunes: Date, extra: nº de clases extra }],
+// de la semana más antigua a la más reciente.
+function clasesExtraPorSemana(d, alumno) {
+  if (!alumno.clasesSemanales || alumno.clasesSemanales <= 0) return []
   const hoy = new Date()
   const hoyLunes = inicioSemana(hoy)
   let cursor = inicioSemana(new Date(inicioConteo(alumno) + 'T12:00:00'))
   const maxLookbackMs = 24 * 7 * 24 * 60 * 60 * 1000
   if (hoyLunes - cursor > maxLookbackMs) cursor = new Date(hoyLunes.getTime() - maxLookbackMs)
-  let total = 0
+  const semanas = []
   let guard = 0
   while (cursor <= hoyLunes && guard < 30) {
     const domingo = new Date(cursor); domingo.setDate(cursor.getDate() + 6); domingo.setHours(23, 59, 59, 999)
@@ -204,11 +210,11 @@ function clasesExtraAcumuladas(d, alumno) {
       const f = new Date(s.fecha + 'T12:00:00')
       return f >= cursor && f <= domingo
     }).length
-    if (count > alumno.clasesSemanales) total += (count - alumno.clasesSemanales)
+    if (count > alumno.clasesSemanales) semanas.push({ lunes: new Date(cursor), extra: count - alumno.clasesSemanales })
     cursor = new Date(cursor); cursor.setDate(cursor.getDate() + 7)
     guard++
   }
-  return total
+  return semanas
 }
 
 // Clases extra pendientes de cobro (solo alumnos de modalidad mensual con
@@ -232,6 +238,69 @@ export function getClasesExtraDetalle(d, alumno) {
       concepto: `${n} clase${n > 1 ? 's' : ''} extra`
     })
   }
+  return out
+}
+
+const fechaCorta = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+const fechaLarga = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
+
+// Lista detallada de lo pendiente de un alumno, una fila por cosa concreta
+// (para el bloque "Pagos Pendientes" de la pestaña Pagos). Usa los mismos
+// cálculos que las alertas y el total de Resumen, así que siempre cuadran.
+// Se considera que cada pago cubre lo más antiguo primero.
+// Cada fila: { key, titulo, detalle, importe, cobro } donde "cobro" sirve para
+// rellenar el formulario de Registrar pago. Las filas "manual: true" son los
+// pagos anotados a mano como "⏳ Pendiente".
+export function getPendientesLista(d, alumno) {
+  if (!alumno) return []
+  const out = []
+  if (!conteoParalizado(alumno)) {
+    const mod = alumno.modalidad || 'fija'
+    if (mod === 'fija') {
+      pendientesMensuales(d, alumno).forEach(it => out.push({
+        key: 'mes-' + it.value, titulo: 'Mensualidad · ' + it.periodo, detalle: 'Mes sin cobrar', importe: it.importe,
+        cobro: { modo: 'mes', mes: it.value, importe: it.importe, concepto: it.concepto }
+      }))
+      // Clases extra: las ya cobradas cubren las semanas más antiguas.
+      let pagadas = unidadesPagadas(d, alumno, 'extra')
+      const precio = alumno.precioSesion || 0
+      clasesExtraPorSemana(d, alumno).forEach(w => {
+        const cubiertas = Math.min(pagadas, w.extra)
+        pagadas -= cubiertas
+        const n = w.extra - cubiertas
+        if (n <= 0) return
+        const semana = fechaCorta(w.lunes.getFullYear() + '-' + String(w.lunes.getMonth() + 1).padStart(2, '0') + '-' + String(w.lunes.getDate()).padStart(2, '0'))
+        out.push({
+          key: 'extra-' + w.lunes.getTime(), titulo: `${n} clase${n > 1 ? 's' : ''} extra`, detalle: 'Semana del ' + semana, importe: n * precio,
+          cobro: { modo: 'extra', importe: n * precio, concepto: `${n} clase${n > 1 ? 's' : ''} extra` }
+        })
+      })
+    } else if (mod === 'pack') {
+      const desde = inicioConteo(alumno)
+      const usadas = d.sesiones
+        .filter(s => s.alumnoId === alumno.id && s.estado === 'presente' && s.fecha >= desde)
+        .map(s => s.fecha).sort()
+      const necesarios = Math.ceil(usadas.length / CLASES_POR_PACK)
+      for (let k = unidadesPagadas(d, alumno, 'pack') + 1; k <= necesarios; k++) {
+        const clases = usadas.slice((k - 1) * CLASES_POR_PACK, k * CLASES_POR_PACK)
+        out.push({
+          key: 'pack-' + k, titulo: `Pack de ${CLASES_POR_PACK} clases`,
+          detalle: `${clases.length}/${CLASES_POR_PACK} clases usadas · desde ${fechaCorta(clases[0])}`, importe: alumno.precioPack || 0,
+          cobro: { importe: alumno.precioPack || 0, concepto: `1 pack de ${CLASES_POR_PACK} clases` }
+        })
+      }
+    } else {
+      const pasadas = sesionesPasadas(d, alumno).map(s => s.fecha).sort()
+      pasadas.slice(unidadesPagadas(d, alumno, 'sesion')).forEach(f => out.push({
+        key: 'ses-' + f, titulo: 'Sesión', detalle: fechaLarga(f), importe: alumno.precioSesion || 0,
+        cobro: { importe: alumno.precioSesion || 0, concepto: 'Sesión del ' + fechaCorta(f) }
+      }))
+    }
+  }
+  d.pagos
+    .filter(p => p.alumnoId === alumno.id && p.tipo === 'pendiente')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .forEach(p => out.push({ key: 'man-' + p.id, id: p.id, manual: true, titulo: p.concepto, detalle: 'Anotado a mano el ' + fechaCorta(p.fecha), importe: p.importe }))
   return out
 }
 

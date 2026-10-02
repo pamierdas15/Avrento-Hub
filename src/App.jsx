@@ -166,6 +166,7 @@ export default function App() {
             data={data}
             registrarPago={store.registrarPago}
             eliminarPago={store.eliminarPago}
+            marcarPagoCobrado={store.marcarPagoCobrado}
             showToast={showToast}
             toastDeshacer={toastDeshacer}
             onAbrirWhatsapp={() => setWaOpen(true)}

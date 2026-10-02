@@ -7,7 +7,7 @@ export default function Asistencia({ data, esFestivo, registrarSesion, eliminarS
   const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
   const [fecha, setFecha] = useState(todayStr())
   const [estado, setEstado] = useState('presente')
-  const [registrarOpen, setRegistrarOpen] = useState(true)
+  const [registrarOpen, setRegistrarOpen] = useState(false)
 
   function guardar() {
     if (!alumnoId || !fecha) { showToast('Selecciona alumno y fecha'); return }

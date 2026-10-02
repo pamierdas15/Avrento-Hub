@@ -180,6 +180,7 @@ textarea{height:70px;resize:none}
 .section-hero-icon.purple{background:linear-gradient(135deg,#a78bfa,#7c3aed)}
 .section-hero-icon.red{background:linear-gradient(135deg,#f87171,#dc2626)}
 .section-hero-icon.blue{background:linear-gradient(135deg,#4d9fff,#2563eb)}
+.section-hero-icon.amber{background:linear-gradient(135deg,#fbbf24,#d97706)}
 .section-hero-icon.whatsapp{background:linear-gradient(135deg,#25d366,#128c3e)}
 .section-hero-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.01em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .section-hero-count{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--text-muted);background:rgba(255,255,255,0.06);border-radius:999px;padding:3px 9px;flex-shrink:0}
@@ -392,6 +393,11 @@ select.select-extra{border-color:rgba(251,191,36,0.4)}
 .fila-mes select:first-child{flex:2}
 .fila-mes select:last-child{flex:1}
 .badge.badge-mr{margin-right:6px}
+.pend-total{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin-bottom:4px;border-radius:10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);font-size:12px;font-weight:700;color:rgba(255,255,255,0.75)}
+.pend-total-val{font-family:'JetBrains Mono',monospace;color:#fbbf24}
+.cobrar-btn{flex-shrink:0;padding:6px 10px;border-radius:10px;border:1px solid rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.cobrar-btn:active{opacity:0.7}
+#registrar-pago{scroll-margin-top:12px}
 
 /* ---- Calendario de Asistencia ---- */
 .cal-hero-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
