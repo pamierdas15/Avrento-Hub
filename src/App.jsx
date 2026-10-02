@@ -130,7 +130,6 @@ export default function App() {
             showToast={showToast}
             onGoTab={setTab}
             onIrAPago={irAPago}
-            onNuevoAlumno={abrirNuevoAlumno}
             onVerAlertas={() => setAlertasOpen(true)}
           />
         )

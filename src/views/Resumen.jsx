@@ -1,5 +1,6 @@
 import { DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { fmt, alumnoColor, initials, todayStr } from '../utils/helpers'
+import { getResumenPendiente } from '../utils/business'
 
 // Clave de mes ("YYYY-MM") a la que se acumula un pago: si el pago es de un
 // alumno mensual, el mes que el propio pago indica como "correspondiente"
@@ -13,7 +14,10 @@ function mesClaveDePago(p) {
 export default function Resumen({ data, onAbrirBackup, showToast }) {
   const hoy = new Date(), mes = hoy.getMonth(), anyo = hoy.getFullYear()
   const cobradoMes = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.tipo === 'recibido' && f.getMonth() === mes && f.getFullYear() === anyo }).reduce((s, p) => s + p.importe, 0)
-  const pendienteTotal = data.pagos.filter(p => p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
+  // Todo lo que falta por cobrar, calculado igual que en Pagos y en las alertas:
+  // mensualidades, packs, sesiones y clases extra pendientes de cada alumno.
+  const pendienteAlumno = a => getResumenPendiente(data, a).importe
+  const pendienteTotal = data.alumnos.reduce((s, a) => s + pendienteAlumno(a), 0)
   const totalSes = data.sesiones.length
   const pres = data.sesiones.filter(s => s.estado === 'presente').length
   const mesLabel = hoy.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
@@ -115,7 +119,7 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
         const ses = data.sesiones.filter(s => s.alumnoId === a.id)
         const presA = ses.filter(s => s.estado === 'presente').length
         const cobA = data.pagos.filter(p => { const f = new Date(p.fecha + 'T12:00:00'); return p.alumnoId === a.id && p.tipo === 'recibido' && f.getMonth() === mes && f.getFullYear() === anyo }).reduce((s, p) => s + p.importe, 0)
-        const pendA = data.pagos.filter(p => p.alumnoId === a.id && p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
+        const pendA = pendienteAlumno(a)
         return (
           <div className="card" key={a.id}>
             <div className="card-row card-row-mb">

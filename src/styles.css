@@ -32,7 +32,9 @@ html,body{height:100%;background:#04060c;color:#fff}
 
 /* ---- Cabecera global (logo + título de pestaña + icono flotante) ---- */
 .header-bar{position:relative;flex-shrink:0}
-.header-bar-bg{position:absolute;inset:0;background:rgba(4,6,12,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);clip-path:url(#header-notch-clip)}
+/* Mismo fondo que el pie (barra de pestañas). Es opaco para que el brillo azul
+   del fondo de la app no se trasluzca y la cabecera se vea igual que el pie. */
+.header-bar-bg{position:absolute;inset:0;background:#05080f;border-bottom:1px solid var(--line);clip-path:url(#header-notch-clip)}
 .header-bar-content{position:relative;height:56px}
 .header-app-pos{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:10px;white-space:nowrap}
 .header-tab-pos{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;align-items:center;white-space:nowrap}
@@ -115,9 +117,6 @@ textarea{height:70px;resize:none}
 .rv.red{color:var(--red)}
 .rv.purple{color:var(--accent)}
 
-.quick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card-top-2),var(--card-bottom));cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
-.quick-btn:active{opacity:0.7}
-.quick-btn .qico{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 
 .toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:99;box-shadow:0 10px 26px rgba(77,159,255,0.4)}
 .toast.show{opacity:1}
@@ -238,20 +237,17 @@ textarea{height:70px;resize:none}
 .subtitulo-caps{font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
 .inp-label-hint{color:rgba(255,255,255,0.4);font-weight:400}
 
-/* ---- Inicio: accesos rápidos ---- */
-.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
-.quick-btn .qico.qico-azul{background:rgba(37,99,235,0.2)}
-.quick-btn .qico.qico-verde{background:rgba(29,158,117,0.2)}
-.quick-btn .qico.qico-morado{background:rgba(124,58,237,0.2)}
-.quick-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.8)}
 
 /* ---- Inicio: caja de alertas ---- */
 .alerta-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:12px 14px;margin-bottom:16px;cursor:pointer}
 .alerta-box-title{font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px}
 .alerta-box-item{font-size:11px;color:rgba(255,255,255,0.6)}
 .alerta-box-more{font-size:11px;color:#fbbf24;margin-top:2px}
-.ok-box{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.15);border-radius:14px;padding:10px 14px;margin-bottom:16px}
-.ok-box-title{font-size:12px;font-weight:700;color:#34d399}
+.tareas-box{background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.22);border-radius:14px;padding:12px 14px;margin-bottom:16px;cursor:pointer}
+.tareas-box-title{font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:4px}
+.tareas-box-fecha{color:rgba(255,255,255,0.4)}
+.tareas-box-fecha.vencida{color:#f87171}
+.tareas-box-more{font-size:11px;color:#a78bfa;margin-top:2px}
 
 /* ---- Inicio: tira semanal ---- */
 .semana-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}

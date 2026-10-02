@@ -268,10 +268,11 @@ export function getResumenPendiente(d, alumno) {
     return { count: items.length + extra.count, importe, texto }
   }
   if (alumno.modalidad === 'pack') {
+    // La lista de packs son opciones acumuladas ("1 pack", "2 packs"...): el
+    // total pendiente es la última opción, no la suma de todas.
     const items = pendientesPack(d, alumno)
-    const importe = items.reduce((s, it) => s + it.importe, 0)
-    const texto = items.map(it => it.periodo).join(' y ')
-    return { count: items.length, importe, texto }
+    const ultimo = items[items.length - 1]
+    return { count: items.length, importe: ultimo ? ultimo.importe : 0, texto: ultimo ? ultimo.periodo : '' }
   }
   const items = pendientesSesiones(d, alumno)
   const pend = items.length
