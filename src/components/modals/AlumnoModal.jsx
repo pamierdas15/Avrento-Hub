@@ -20,7 +20,12 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
   const [form, setForm] = useState(BLANK)
 
   useEffect(() => {
-    if (open) setForm(editing ? { ...BLANK, ...editing } : BLANK)
+    if (!open) return
+    if (!editing) { setForm(BLANK); return }
+    // Normaliza estados antiguos ("pausado"/"baja", de antes de simplificar
+    // a solo Activo/Inactivo) a "inactivo" al cargar el formulario.
+    const estado = editing.estado === 'activo' ? 'activo' : 'inactivo'
+    setForm({ ...BLANK, ...editing, estado })
   }, [open, editing])
 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
@@ -33,8 +38,8 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
   function guardar() {
     if (!form.nombre.trim()) { showToast('Introduce el nombre'); return }
-    // Al reactivar un alumno pausado/de baja, su fecha de alta se actualiza a
-    // hoy: los pagos pendientes se cuentan siempre desde la fecha de alta.
+    // Al reactivar un alumno inactivo, su fecha de alta se actualiza a hoy:
+    // los pagos pendientes se cuentan siempre desde la fecha de alta.
     const reactivando = form.estado === 'activo' && editing && editing.estado !== 'activo'
     const alta = reactivando ? todayStr() : form.alta
     onSave({
@@ -87,10 +92,10 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       <div className="inp-row">
         <label className="inp-label">Estado</label>
         <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
-          {['activo', 'pausado', 'baja'].map(e => {
+          {['activo', 'inactivo'].map(e => {
             const on = form.estado === e
             const c = ESTADO_BTN_CFG[e]
-            const label = e === 'activo' ? '✓ Activo' : e === 'pausado' ? '⏸ Pausado' : '✗ Baja'
+            const label = e === 'activo' ? '✓ Activo' : '✗ Inactivo'
             return (
               <button type="button" key={e} onClick={() => set('estado', e)}
                 style={{ flex: 1, padding: 8, borderRadius: 10, fontWeight: 700, fontSize: 12, cursor: 'pointer',

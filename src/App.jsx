@@ -129,7 +129,15 @@ export default function App() {
           />
         )
       case 'alumnos':
-        return <Alumnos data={data} onNuevoAlumno={abrirNuevoAlumno} onVerDetalle={setDetalleId} />
+        return (
+          <Alumnos
+            data={data}
+            onNuevoAlumno={abrirNuevoAlumno}
+            onVerDetalle={setDetalleId}
+            onCompletarTarea={store.eliminarTarea}
+            showToast={showToast}
+          />
+        )
       case 'asistencia':
         return (
           <Asistencia

@@ -1,5 +1,5 @@
 import Modal from '../Modal.jsx'
-import { ESTADO_CFG, MODALIDAD_CFG } from '../../utils/constants'
+import { estadoCfg, MODALIDAD_CFG } from '../../utils/constants'
 import { initials, alumnoColor, fmt } from '../../utils/helpers'
 import { getClasesPackInfo } from '../../utils/business'
 
@@ -15,7 +15,7 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
   const just = ses.filter(s => s.estado === 'justificada').length
   const cobrado = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'recibido').reduce((s, p) => s + p.importe, 0)
   const pendiente = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
-  const eb = ESTADO_CFG[a.estado || 'activo']
+  const eb = estadoCfg(a.estado || 'activo')
   const tareas = ((data.tareas && data.tareas[alumnoId]) || []).slice().sort((x, y) => y.fecha.localeCompare(x.fecha))
   const pack = getClasesPackInfo(data, a)
 

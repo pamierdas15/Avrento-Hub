@@ -27,9 +27,9 @@ function sesionesPasadas(d, alumno) {
 
 function capitaliza(s) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
-// Mientras un alumno está pausado o de baja, no se genera ningún pago pendiente nuevo.
+// Mientras un alumno está inactivo, no se genera ningún pago pendiente nuevo.
 function conteoParalizado(alumno) {
-  return alumno.estado === 'pausado' || alumno.estado === 'baja'
+  return (alumno.estado || 'activo') !== 'activo'
 }
 
 // ---- Periodos pendientes por modalidad (fuente única de verdad) ----
@@ -41,33 +41,31 @@ function pendientesMensuales(d, alumno) {
   const inicio = new Date(desde + 'T12:00:00')
   let y = inicio.getFullYear(), m = inicio.getMonth()
   const limitY = hoy.getFullYear(), limitM = hoy.getMonth()
-  const incluyeMesActual = hoy.getDate() > 15
   const out = []
   let guard = 0
+  // El mes en curso cuenta como pendiente desde el día 1, igual que cualquier
+  // otro mes vencido (antes se esperaba a mediados de mes para mostrarlo).
   while ((y < limitY || (y === limitY && m <= limitM)) && guard < 24) {
-    const esMesActual = y === limitY && m === limitM
-    if (!esMesActual || incluyeMesActual) {
-      const clave = `${y}-${String(m + 1).padStart(2, '0')}`
-      // Un mes se considera cobrado si existe un pago "recibido" cuyo mes
-      // correspondiente coincide con este periodo. Para pagos antiguos sin
-      // ese dato (guardados antes de que existiera el campo), se recurre a
-      // la fecha real del pago como alternativa.
-      const ok = d.pagos.some(p => {
-        if (p.alumnoId !== alumno.id || p.tipo !== 'recibido') return false
-        if (p.mesCorrespondiente) return p.mesCorrespondiente === clave
-        const f = new Date(p.fecha + 'T12:00:00')
-        return f.getFullYear() === y && f.getMonth() === m
+    const clave = `${y}-${String(m + 1).padStart(2, '0')}`
+    // Un mes se considera cobrado si existe un pago "recibido" cuyo mes
+    // correspondiente coincide con este periodo. Para pagos antiguos sin
+    // ese dato (guardados antes de que existiera el campo), se recurre a
+    // la fecha real del pago como alternativa.
+    const ok = d.pagos.some(p => {
+      if (p.alumnoId !== alumno.id || p.tipo !== 'recibido') return false
+      if (p.mesCorrespondiente) return p.mesCorrespondiente === clave
+      const f = new Date(p.fecha + 'T12:00:00')
+      return f.getFullYear() === y && f.getMonth() === m
+    })
+    if (!ok) {
+      const periodo = `${capitaliza(MESES[m])} ${y}`
+      out.push({
+        value: `${y}-${String(m + 1).padStart(2, '0')}`,
+        label: `${periodo} · ${fmt(alumno.tarifa)}`,
+        importe: alumno.tarifa,
+        periodo,
+        concepto: `Mensualidad de ${MESES[m]} ${y}`
       })
-      if (!ok) {
-        const periodo = `${capitaliza(MESES[m])} ${y}`
-        out.push({
-          value: `${y}-${String(m + 1).padStart(2, '0')}`,
-          label: `${periodo} · ${fmt(alumno.tarifa)}`,
-          importe: alumno.tarifa,
-          periodo,
-          concepto: `Mensualidad de ${MESES[m]} ${y}`
-        })
-      }
     }
     m++; if (m > 11) { m = 0; y++ }
     guard++

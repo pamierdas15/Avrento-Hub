@@ -12,14 +12,19 @@ export const TURNOS = { '17:00': 'T1 · 17–18:30', '18:30': 'T2 · 18:30–20h
 
 export const ESTADO_CFG = {
   activo: { bg: 'rgba(52,211,153,0.12)', color: '#34d399', txt: '✓ Activo' },
-  pausado: { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', txt: '⏸ Pausado' },
-  baja: { bg: 'rgba(248,113,113,0.12)', color: '#f87171', txt: '✗ Baja' }
+  inactivo: { bg: 'rgba(248,113,113,0.12)', color: '#f87171', txt: '✗ Inactivo' }
 }
 
 export const ESTADO_BTN_CFG = {
   activo: { bg: 'rgba(52,211,153,0.1)', color: '#34d399', border: 'rgba(52,211,153,0.4)' },
-  pausado: { bg: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: 'rgba(251,191,36,0.4)' },
-  baja: { bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.4)' }
+  inactivo: { bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.4)' }
+}
+
+// Devuelve la configuración visual del estado de un alumno. Normaliza valores
+// antiguos ("pausado"/"baja", de antes de simplificar a solo Activo/Inactivo)
+// hacia "inactivo" para que perfiles guardados previamente sigan mostrándose bien.
+export function estadoCfg(estado) {
+  return ESTADO_CFG[estado] || ESTADO_CFG.inactivo
 }
 
 export const FEST_CFG = {

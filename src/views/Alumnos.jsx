@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { ESTADO_CFG, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
+import { estadoCfg, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { initials, alumnoColor, fmt } from '../utils/helpers'
 import { getClasesPackInfo } from '../utils/business'
 
 function AlumnoCard({ a, idx, data, onVerDetalle }) {
-  const eb = ESTADO_CFG[a.estado || 'activo']
+  const eb = estadoCfg(a.estado || 'activo')
   const pack = getClasesPackInfo(data, a)
+  const inactivo = (a.estado || 'activo') !== 'activo'
   return (
-    <div className="card" onClick={() => onVerDetalle(a.id)} style={a.estado === 'baja' ? { opacity: 0.45 } : undefined}>
+    <div className="card" onClick={() => onVerDetalle(a.id)} style={inactivo ? { opacity: 0.45 } : undefined}>
       <div className="card-row">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
           <div className="avatar" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
@@ -33,9 +34,10 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
   )
 }
 
-export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
+export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletarTarea, showToast }) {
   const [termino, setTermino] = useState('')
   const [activosOpen, setActivosOpen] = useState(false)
+  const [inactivosOpen, setInactivosOpen] = useState(false)
   const [tareasOpen, setTareasOpen] = useState(false)
   const [tareaAbiertaId, setTareaAbiertaId] = useState(null)
   const { alumnos } = data
@@ -48,7 +50,12 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
   )
 
   const activos = lista.filter(a => (a.estado || 'activo') === 'activo')
-  const otros = lista.filter(a => (a.estado || 'activo') !== 'activo')
+  const inactivos = lista.filter(a => (a.estado || 'activo') !== 'activo')
+
+  function completarTarea(alumnoId, tareaId) {
+    onCompletarTarea && onCompletarTarea(alumnoId, tareaId)
+    showToast && showToast('Tarea completada')
+  }
 
   const tareas = (data.alumnos || []).flatMap(a =>
     ((data.tareas && data.tareas[a.id]) || []).map(tt => ({ ...tt, alumnoId: a.id, alumnoNombre: a.nombre }))
@@ -97,15 +104,21 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
                 const key = tt.alumnoId + '-' + tt.id
                 const abierta = tareaAbiertaId === key
                 return (
-                  <div key={key} className="tarea-perfil-item mini-hero-click" onClick={() => setTareaAbiertaId(abierta ? null : key)}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{tt.tarea}</span>
-                      <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
-                        {new Date(tt.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
+                  <div key={key} className="tarea-perfil-item tarea-perfil-row">
+                    <div className="mini-hero-click" style={{ cursor: 'pointer' }} onClick={() => setTareaAbiertaId(abierta ? null : key)}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{tt.tarea}</span>
+                        <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+                          {new Date(tt.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tt.alumnoNombre}</div>
+                      {abierta && tt.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{tt.evento}</div> : null}
                     </div>
-                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tt.alumnoNombre}</div>
-                    {abierta && tt.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{tt.evento}</div> : null}
+                    <button
+                      className="tarea-realizada-btn"
+                      onClick={e => { e.stopPropagation(); completarTarea(tt.alumnoId, tt.id) }}
+                    >✓ Realizada</button>
                   </div>
                 )
               })}
@@ -113,14 +126,29 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle }) {
         ) : null}
       </div>
 
-      <div className="sec-label">Otros alumnos</div>
+      <div className="section-hero">
+        <div className="section-hero-header" onClick={() => setInactivosOpen(o => !o)}>
+          <div className="section-hero-left">
+            <div className="section-hero-icon red">✗</div>
+            <div className="section-hero-title">Alumnos Inactivos</div>
+            <span className="section-hero-count">{inactivos.length}</span>
+          </div>
+          <div className="section-hero-toggle" style={{ transform: inactivosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+        </div>
+        {inactivosOpen ? (
+          <div className="section-hero-body">
+            {!inactivos.length
+              ? <p className="empty">Sin alumnos inactivos.</p>
+              : inactivos.map(a => <AlumnoCard key={a.id} a={a} idx={alumnos.indexOf(a)} data={data} onVerDetalle={onVerDetalle} />)}
+          </div>
+        ) : null}
+      </div>
+
       {!alumnos.length
         ? <p className="empty">Sin alumnos registrados.</p>
-        : !lista.length
+        : t && !lista.length
           ? <p className="empty">Sin resultados.</p>
-          : !otros.length
-            ? <p className="empty">Sin alumnos pausados o de baja.</p>
-            : otros.map(a => <AlumnoCard key={a.id} a={a} idx={alumnos.indexOf(a)} data={data} onVerDetalle={onVerDetalle} />)}
+          : null}
     </div>
   )
 }
