@@ -23,7 +23,7 @@ import { todayStr } from './utils/helpers.js'
 export default function App() {
   const store = useAppData()
   const { data, esFestivo } = store
-  const { msg, show, showToast } = useToast()
+  const { msg, accion, show, showToast, toastDeshacer, ocultar } = useToast()
 
   const [tab, setTab] = useState('inicio')
 
@@ -105,9 +105,9 @@ export default function App() {
 
   function eliminarAlumno(id) {
     if (!confirm('¿Eliminar este alumno y todos sus datos?')) return
-    store.eliminarAlumno(id)
+    const deshacer = store.eliminarAlumno(id)
     setAlumnoModalOpen(false)
-    showToast('Alumno eliminado')
+    toastDeshacer('Alumno eliminado', deshacer)
   }
 
   const alertasActuales = getAlertas(data)
@@ -147,6 +147,7 @@ export default function App() {
             onMarcarEvento={store.marcarEvento}
             onEliminarEvento={store.eliminarEvento}
             showToast={showToast}
+            toastDeshacer={toastDeshacer}
           />
         )
       case 'asistencia':
@@ -157,6 +158,7 @@ export default function App() {
             registrarSesion={store.registrarSesion}
             eliminarSesion={store.eliminarSesion}
             showToast={showToast}
+            toastDeshacer={toastDeshacer}
           />
         )
       case 'pagos':
@@ -166,6 +168,7 @@ export default function App() {
             registrarPago={store.registrarPago}
             eliminarPago={store.eliminarPago}
             showToast={showToast}
+            toastDeshacer={toastDeshacer}
             onAbrirWhatsapp={() => setWaOpen(true)}
             onAbrirConfirmacion={(id) => { setConfirmPagoAlumnoId(id); setConfirmPagoOpen(true) }}
             preselectAlumnoId={pagosPreselect}
@@ -180,7 +183,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+      <svg width="0" height="0" className="svg-defs" aria-hidden="true">
         <defs>
           <clipPath id="tab-notch-clip" clipPathUnits="objectBoundingBox">
             <path d="M0,0 H0.3875 C0.4375,0 0.445,0.42 0.5,0.42 C0.555,0.42 0.5625,0 0.6125,0 H1 V1 H0 Z" />
@@ -232,7 +235,7 @@ export default function App() {
         showToast={showToast}
       />
 
-      <Toast msg={msg} show={show} />
+      <Toast msg={msg} accion={accion} show={show} onCerrar={ocultar} />
     </div>
   )
 }

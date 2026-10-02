@@ -23,11 +23,11 @@ export default function EventoProximoHero({ alumnoId, onGuardar, showToast }) {
     <div className="mini-hero">
       <div className="mini-hero-label mini-hero-toggle" onClick={() => setOpen(o => !o)}>
         <span>📅 Eventos Próximos</span>
-        <span style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+        <span className={'rot' + (open ? ' is-open' : '')}>▾</span>
       </div>
 
       {open ? (
-        <div style={{ marginTop: 8 }}>
+        <div className="mini-hero-body">
           <div className="inp-row">
             <label className="inp-label">Evento</label>
             <input type="text" placeholder="Título del evento" value={tarea} onChange={e => setTarea(e.target.value)} />

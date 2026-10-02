@@ -32,6 +32,64 @@ function conteoParalizado(alumno) {
   return (alumno.estado || 'activo') !== 'activo'
 }
 
+// ---- Qué cubre cada pago ----
+// Cada pago cobrado guarda a qué corresponde, en el momento de registrarlo:
+//   cubre: 'mes'    → una mensualidad (con mesCorrespondiente "AAAA-MM")
+//   cubre: 'pack'   → unidades = nº de packs que paga
+//   cubre: 'sesion' → unidades = nº de sesiones que paga
+//   cubre: 'extra'  → unidades = nº de clases extra que paga (alumnos mensuales)
+// Las unidades se calculan con el precio vigente AL COBRAR, así que cambiar
+// después la tarifa o la modalidad del alumno ya no reinterpreta pagos pasados.
+
+function precioUnidad(alumno, cubre) {
+  if (cubre === 'pack') return alumno.precioPack || 0
+  if (cubre === 'sesion' || cubre === 'extra') return alumno.precioSesion || 0
+  return alumno.tarifa || 0
+}
+
+// Devuelve el pago con "cubre" y, si procede, "unidades" ya calculadas.
+export function describirCobertura(alumno, pago, cubre) {
+  if (!alumno || pago.tipo !== 'recibido') return pago
+  if (cubre === 'mes') return { ...pago, cubre }
+  const precio = precioUnidad(alumno, cubre)
+  return { ...pago, cubre, unidades: precio > 0 ? +(pago.importe / precio).toFixed(4) : 0 }
+}
+
+// Suma de unidades pagadas de un tipo desde el inicio del conteo vigente.
+// Se admiten pagos parciales: dos pagos de medio pack cuentan como un pack.
+function unidadesPagadas(d, alumno, cubre) {
+  const desde = inicioConteo(alumno)
+  const total = d.pagos
+    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.cubre === cubre && p.fecha >= desde)
+    .reduce((s, p) => s + (p.unidades || 0), 0)
+  return Math.floor(total + 1e-6)
+}
+
+// Convierte pagos guardados antes de existir "cubre" al formato nuevo. Usa
+// la modalidad y los precios actuales del alumno, que es exactamente como la
+// app los interpretaba hasta ahora, de modo que las cifras no cambian; a
+// partir de aquí quedan fijados. Es idempotente: solo toca pagos sin "cubre".
+export function migrarPagos(d) {
+  let cambio = false
+  const pagos = (d.pagos || []).map(p => {
+    if (p.cubre || p.tipo !== 'recibido') return p
+    const a = (d.alumnos || []).find(x => x.id === p.alumnoId)
+    if (!a) return p
+    cambio = true
+    if (/clase extra/i.test(p.concepto || '')) {
+      // Antes, cobrar una clase extra a un alumno mensual guardaba también un
+      // mes y lo daba por pagado por error: aquí se le quita ese mes.
+      const { mesCorrespondiente, ...resto } = p // eslint-disable-line no-unused-vars
+      return describirCobertura(a, resto, 'extra')
+    }
+    if (p.mesCorrespondiente) return { ...p, cubre: 'mes' }
+    const mod = a.modalidad || 'fija'
+    if (mod === 'fija') return { ...p, cubre: 'mes', mesCorrespondiente: p.fecha.slice(0, 7) }
+    return describirCobertura(a, p, mod)
+  })
+  return cambio ? { ...d, pagos } : d
+}
+
 // ---- Periodos pendientes por modalidad (fuente única de verdad) ----
 
 function pendientesMensuales(d, alumno) {
@@ -47,16 +105,11 @@ function pendientesMensuales(d, alumno) {
   // otro mes vencido (antes se esperaba a mediados de mes para mostrarlo).
   while ((y < limitY || (y === limitY && m <= limitM)) && guard < 24) {
     const clave = `${y}-${String(m + 1).padStart(2, '0')}`
-    // Un mes se considera cobrado si existe un pago "recibido" cuyo mes
-    // correspondiente coincide con este periodo. Para pagos antiguos sin
-    // ese dato (guardados antes de que existiera el campo), se recurre a
-    // la fecha real del pago como alternativa.
-    const ok = d.pagos.some(p => {
-      if (p.alumnoId !== alumno.id || p.tipo !== 'recibido') return false
-      if (p.mesCorrespondiente) return p.mesCorrespondiente === clave
-      const f = new Date(p.fecha + 'T12:00:00')
-      return f.getFullYear() === y && f.getMonth() === m
-    })
+    // Un mes se considera cobrado si existe un pago "recibido" de
+    // mensualidad cuyo mes correspondiente coincide con este periodo.
+    const ok = d.pagos.some(p =>
+      p.alumnoId === alumno.id && p.tipo === 'recibido' && p.cubre === 'mes' && p.mesCorrespondiente === clave
+    )
     if (!ok) {
       const periodo = `${capitaliza(MESES[m])} ${y}`
       out.push({
@@ -86,13 +139,9 @@ function clasesConsumidasPack(d, alumno) {
 // pendiente de cobro.
 function pendientesPack(d, alumno) {
   if (conteoParalizado(alumno)) return []
-  const desde = inicioConteo(alumno)
   const consumidas = clasesConsumidasPack(d, alumno)
   const packsNecesarios = Math.ceil(consumidas / CLASES_POR_PACK)
-  const totalPagado = d.pagos
-    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde)
-    .reduce((s, p) => s + p.importe, 0)
-  const packsPagados = alumno.precioPack > 0 ? Math.floor(totalPagado / alumno.precioPack) : 0
+  const packsPagados = unidadesPagadas(d, alumno, 'pack')
   const pend = packsNecesarios - packsPagados
   if (pend <= 0) return []
   const out = []
@@ -120,12 +169,8 @@ export function getClasesPackInfo(d, alumno) {
 
 function pendientesSesiones(d, alumno) {
   if (conteoParalizado(alumno)) return []
-  const desde = inicioConteo(alumno)
   const ses = sesionesPasadas(d, alumno).length
-  const total = d.pagos
-    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde)
-    .reduce((s, p) => s + p.importe, 0)
-  const pag = alumno.precioSesion > 0 ? Math.floor(total / alumno.precioSesion) : 0
+  const pag = unidadesPagadas(d, alumno, 'sesion')
   const pend = ses - pag
   if (pend <= 0) return []
   const out = []
@@ -174,12 +219,8 @@ export function getClasesExtraDetalle(d, alumno) {
   if (alumno.modalidad !== 'fija' || !alumno.clasesSemanales) return []
   const totalExtra = clasesExtraAcumuladas(d, alumno)
   if (totalExtra <= 0) return []
-  const desde = inicioConteo(alumno)
   const precio = alumno.precioSesion || 0
-  const pagado = d.pagos
-    .filter(p => p.alumnoId === alumno.id && p.tipo === 'recibido' && p.fecha >= desde && /clase extra/i.test(p.concepto || ''))
-    .reduce((s, p) => s + p.importe, 0)
-  const pagadas = precio > 0 ? Math.floor(pagado / precio) : 0
+  const pagadas = unidadesPagadas(d, alumno, 'extra')
   const pend = totalExtra - pagadas
   if (pend <= 0) return []
   const out = []
@@ -188,7 +229,7 @@ export function getClasesExtraDetalle(d, alumno) {
       value: 'extra-' + n,
       label: `${n} clase${n > 1 ? 's' : ''} extra · ${fmt(n * precio)}`,
       importe: n * precio,
-      concepto: `${n} clase${n > 1 ? 's' : ''} extra pendiente${n > 1 ? 's' : ''}`
+      concepto: `${n} clase${n > 1 ? 's' : ''} extra`
     })
   }
   return out

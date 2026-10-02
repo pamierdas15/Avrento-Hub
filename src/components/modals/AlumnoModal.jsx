@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Modal from '../Modal.jsx'
-import { CURSOS, ESTADO_BTN_CFG, MODALIDAD_CFG } from '../../utils/constants'
+import { CURSOS, MODALIDAD_CFG } from '../../utils/constants'
 import { todayStr } from '../../utils/helpers'
 
 const DIAS_BTNS = [
@@ -91,17 +91,12 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
       <div className="inp-row">
         <label className="inp-label">Estado</label>
-        <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+        <div className="fila-botones">
           {['activo', 'inactivo'].map(e => {
             const on = form.estado === e
-            const c = ESTADO_BTN_CFG[e]
             const label = e === 'activo' ? '✓ Activo' : '✗ Inactivo'
             return (
-              <button type="button" key={e} onClick={() => set('estado', e)}
-                style={{ flex: 1, padding: 8, borderRadius: 10, fontWeight: 700, fontSize: 12, cursor: 'pointer',
-                  border: '1px solid ' + (on ? c.border : 'rgba(255,255,255,0.1)'),
-                  background: on ? c.bg : 'rgba(255,255,255,0.05)',
-                  color: on ? c.color : 'rgba(255,255,255,0.6)' }}>
+              <button type="button" key={e} onClick={() => set('estado', e)} className={'estado-btn' + (on ? ' on-' + e : '')}>
                 {label}
               </button>
             )
@@ -112,14 +107,14 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       <div className="inp-row">
         <label className="inp-label">Fecha de alta</label>
         <input type="date" value={form.alta} onChange={e => set('alta', e.target.value)} />
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+        <div className="ayuda-txt">
           Los pagos pendientes se calculan siempre desde esta fecha.
         </div>
       </div>
 
       <div className="inp-row">
         <label className="inp-label">Días de clase</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+        <div className="fila-chips">
           {DIAS_BTNS.map(d => (
             <button type="button" key={d.v} className={'dia-btn' + (form.dias.includes(d.v) ? ' on' : '')} onClick={() => toggleDia(d.v)}>{d.t}</button>
           ))}
@@ -152,12 +147,12 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       {form.modalidad === 'fija' ? (
         <div className="inp-row">
           <label className="inp-label">Clases semanales incluidas en la mensualidad</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 }}>
+          <div className="fila-chips">
             {CLASES_SEMANALES_OPCIONES.map(n => (
               <button type="button" key={n} className={'dia-btn' + (form.clasesSemanales === n ? ' on' : '')} onClick={() => toggleClasesSemanales(n)}>{n}</button>
             ))}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+          <div className="ayuda-txt">
             Si algún mes registra más clases de las indicadas aquí, aparecerán como "Clases Extra" en Pagos.
           </div>
         </div>

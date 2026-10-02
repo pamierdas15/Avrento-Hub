@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
-
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Work Sans',Arial,sans-serif}
 html,body{height:100%;background:#04060c;color:#fff}
 
@@ -201,3 +199,245 @@ textarea{height:70px;resize:none}
 .tarea-realizada-btn{flex-shrink:0;padding:6px 10px;border-radius:10px;border:1px solid rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:#34d399;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .tarea-realizada-btn:active{opacity:0.7}
 .tarea-realizada-btn-done{border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55)}
+
+/* ======================================================================
+   Estilos que antes estaban escritos dentro de los componentes (inline).
+   Los colores que dependen de datos (color de cada alumno, tipo de festivo)
+   siguen viniendo de constants.js.
+   ====================================================================== */
+
+.svg-defs{position:absolute}
+.modal-bg.modal-center{align-items:center}
+
+/* ---- Aviso inferior con botón "Deshacer" ---- */
+.toast{display:flex;align-items:center;gap:12px}
+.toast.toast-accion{padding:6px 6px 6px 16px}
+.toast.toast-accion.show{pointer-events:auto}
+.toast-btn{border:none;background:rgba(255,255,255,0.22);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.toast-btn:active{opacity:0.7}
+
+/* ---- Rotación de flechas desplegables ---- */
+.rot{transition:transform 0.15s}
+.rot.is-open,.section-hero-toggle.is-open{transform:rotate(180deg)}
+
+/* ---- Avatares de distintos tamaños ---- */
+.avatar.avatar-28{width:28px;height:28px;font-size:10px;border-radius:8px}
+.avatar.avatar-30{width:30px;height:30px;font-size:11px;border-radius:8px}
+.avatar.avatar-36{width:36px;height:36px;font-size:12px;border-radius:10px}
+.avatar.avatar-40{width:40px;height:40px;font-size:15px;border-radius:11px}
+.avatar.avatar-48{width:48px;height:48px;font-size:18px;border-radius:14px}
+
+/* ---- Textos reutilizados ---- */
+.txt-normal{text-transform:none}
+.txt-cap{text-transform:capitalize}
+.txt-titulo{font-size:13px;font-weight:700;color:#fff}
+.txt-sub{font-size:11px;color:rgba(255,255,255,0.45)}
+.txt-cobrado{color:#34d399;font-weight:700}
+.txt-pend{color:#f87171;font-weight:700}
+.ayuda-txt{font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px}
+.subtitulo-caps{font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.inp-label-hint{color:rgba(255,255,255,0.4);font-weight:400}
+
+/* ---- Inicio: accesos rápidos ---- */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.quick-btn .qico.qico-azul{background:rgba(37,99,235,0.2)}
+.quick-btn .qico.qico-verde{background:rgba(29,158,117,0.2)}
+.quick-btn .qico.qico-morado{background:rgba(124,58,237,0.2)}
+.quick-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.8)}
+
+/* ---- Inicio: caja de alertas ---- */
+.alerta-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:12px 14px;margin-bottom:16px;cursor:pointer}
+.alerta-box-title{font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px}
+.alerta-box-item{font-size:11px;color:rgba(255,255,255,0.6)}
+.alerta-box-more{font-size:11px;color:#fbbf24;margin-top:2px}
+.ok-box{background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.15);border-radius:14px;padding:10px 14px;margin-bottom:16px}
+.ok-box-title{font-size:12px;font-weight:700;color:#34d399}
+
+/* ---- Inicio: tira semanal ---- */
+.semana-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hoy-btn{font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:3px 9px;cursor:pointer}
+.semana-strip{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:10px 6px;margin-bottom:16px;display:flex;align-items:center;gap:2px;touch-action:pan-y}
+.semana-nav{background:none;border:none;color:var(--text-muted);font-size:16px;padding:0 4px;cursor:pointer;flex-shrink:0}
+.semana-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;flex:1}
+.semana-dia{text-align:center;background:none;border:none;cursor:pointer;padding:2px 0}
+.semana-dow{font-size:9px;color:rgba(255,255,255,0.4);font-weight:400;text-transform:uppercase}
+.semana-dow.is-bold{font-weight:700}
+.semana-dow.is-sel{color:#4d9fff}
+.semana-num{width:28px;height:28px;border-radius:50%;margin:3px auto;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.08)}
+.semana-num.is-hoy{border:1px solid rgba(77,159,255,0.5)}
+.semana-num.is-sel{background:linear-gradient(135deg,#1a4fd6,#2563eb);border:none;box-shadow:0 4px 12px rgba(77,159,255,0.4)}
+.semana-num-txt{font-size:11px;font-weight:400;color:rgba(255,255,255,0.65)}
+.semana-num.is-hoy .semana-num-txt{color:#4d9fff}
+.semana-num.is-sel .semana-num-txt{color:#fff;font-weight:700}
+.semana-fes{font-size:10px;text-align:center}
+.semana-dot{width:4px;height:4px;border-radius:50%;background:rgba(77,159,255,0.5);margin:2px auto}
+.semana-dot.is-sel{background:#4d9fff}
+.semana-vacio{height:6px}
+.sec-label-dia{text-transform:capitalize;font-weight:400;color:rgba(255,255,255,0.45)}
+
+/* ---- Inicio: tarjeta de clase del día ---- */
+.card.turno-t1{border-left:3px solid rgba(77,159,255,0.5)}
+.card.turno-t2{border-left:3px solid rgba(251,146,60,0.5)}
+.card.turno-sin{border-left:3px solid rgba(255,255,255,0.15)}
+.turno-t1-txt{color:#4d9fff}
+.turno-t2-txt{color:#fb923c}
+.turno-sin-txt{color:rgba(255,255,255,0.7)}
+.clase-head{display:flex;align-items:center;gap:10px;cursor:pointer}
+.clase-meta{font-size:11px;color:rgba(255,255,255,0.55)}
+.clase-chevron{font-size:11px;color:rgba(255,255,255,0.35)}
+.clase-body{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.mini-hero-body{margin-top:8px}
+
+/* ---- Alumnos ---- */
+.card.is-inactivo{opacity:0.45}
+.alumno-card-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.alumno-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.alumno-card-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.estado-pill{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.estado-pill.estado-pill-lg{padding:3px 8px;border-radius:20px}
+.estado-activo{background:rgba(52,211,153,0.12);color:#34d399}
+.estado-inactivo{background:rgba(248,113,113,0.12);color:#f87171}
+.precio-txt{font-size:12px;font-weight:700;color:#4d9fff}
+.pack-txt{font-size:10px;font-weight:700;color:#2dd4bf}
+.buscador{position:relative;margin-bottom:12px}
+.buscador-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none}
+.buscador input{padding-left:34px}
+.btn-primary.btn-top{margin-top:0;margin-bottom:12px}
+.btn-secondary.btn-mb{margin-bottom:10px}
+
+/* ---- Listas de tareas / eventos ---- */
+.mini-hero-click.is-hecho{opacity:0.55}
+.registro-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.registro-titulo{font-size:13px;font-weight:700;color:#fff}
+.registro-titulo.tachado{text-decoration:line-through}
+.registro-fecha{font-size:10.5px;color:rgba(255,255,255,0.4);white-space:nowrap}
+.registro-alumno{font-size:11.5px;color:rgba(255,255,255,0.5);margin-top:2px}
+.registro-desc{font-size:12px;color:rgba(255,255,255,0.65);margin-top:6px}
+.registro-acciones{display:flex;align-items:center;gap:2px;flex-shrink:0}
+
+/* ---- Perfil del alumno (DetalleModal) ---- */
+.detalle-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.detalle-nombre{font-size:16px;font-weight:700;color:#fff}
+.detalle-sub{font-size:12px;color:rgba(255,255,255,0.55)}
+.badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.detalle-alta{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px}
+.detalle-notas{font-size:12px;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.05);padding:8px 10px;border-radius:8px;margin-bottom:12px}
+.stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stats-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.rcard.rcard-pack{margin-bottom:14px;border-color:rgba(45,212,191,0.3)}
+.rv.teal{color:#2dd4bf}
+.detalle-seccion{margin-bottom:14px}
+.detalle-item-desc{font-size:12px;color:rgba(255,255,255,0.6);margin-top:3px}
+
+/* ---- Resumen ---- */
+.acciones-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.accion-btn{padding:10px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.accion-azul{border:1px solid rgba(77,159,255,0.25);background:rgba(77,159,255,0.08);color:#4d9fff}
+.accion-morado{border:1px solid rgba(124,58,237,0.25);background:rgba(124,58,237,0.08);color:#a78bfa}
+.card.mes-actual{border-color:rgba(77,159,255,0.3);background:rgba(37,99,235,0.08)}
+.tag-actual{font-size:10px;background:rgba(77,159,255,0.2);color:#4d9fff;padding:1px 6px;border-radius:10px;margin-left:4px}
+.importes-row{display:flex;gap:10px;font-size:12px}
+.card-row.card-row-mb{margin-bottom:8px}
+.fila-alumno{display:flex;align-items:center;gap:8px}
+.txt-tenue{font-size:12px;color:rgba(255,255,255,0.45)}
+
+/* ---- Formulario de alumno ---- */
+.fila-botones{display:flex;gap:8px;margin-top:2px}
+.fila-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.estado-btn{flex:1;padding:8px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6)}
+.estado-btn.on-activo{border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34d399}
+.estado-btn.on-inactivo{border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.1);color:#f87171}
+
+/* ---- Cabecera de modales con icono ---- */
+.modal-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.modal-head.modal-head-tight{margin-bottom:10px}
+.modal-ico{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.modal-ico.ico-azul{background:rgba(77,159,255,0.15)}
+.modal-ico.ico-verde{background:rgba(37,211,102,0.15)}
+.modal-ico.ico-ambar{background:rgba(251,191,36,0.15)}
+.modal-head-title{font-size:15px;font-weight:700;color:#fff}
+.modal-desc{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:14px}
+
+/* ---- Backup ---- */
+.backup-ultimo{font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin:6px 0 12px}
+.divisor{height:1px;background:rgba(255,255,255,0.07);margin-bottom:12px}
+.ajuste-row{display:flex;align-items:center;justify-content:space-between;padding:8px 2px;margin-bottom:12px}
+.ajuste-desc{font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px}
+.switch{width:44px;height:26px;border-radius:999px;border:none;flex-shrink:0;cursor:pointer;position:relative;background:rgba(255,255,255,0.12);transition:background 0.2s}
+.switch.on{background:linear-gradient(135deg,var(--accent),#2563eb)}
+.switch-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+.switch.on .switch-knob{left:22px}
+.btn-archivo{display:block;width:100%;padding:11px;border-radius:14px;border:1px solid rgba(77,159,255,0.4);color:#4d9fff;font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+.btn-archivo input{display:none}
+
+/* ---- WhatsApp (recordatorio / confirmación) ---- */
+.aviso-ambar{font-size:11.5px;color:#fbbf24;margin-bottom:10px}
+.card.card-pago-ok{padding:10px 12px;margin-bottom:10px;background:rgba(37,211,102,0.07);border-color:rgba(37,211,102,0.2)}
+.txt-mini{font-size:11px;color:rgba(255,255,255,0.5)}
+textarea.plantilla-txt{height:100px;font-size:13px}
+.preview-box{background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.15);border-radius:12px;padding:12px;margin-bottom:12px}
+.preview-label{font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.preview-txt{font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5;white-space:pre-wrap}
+.btn-whatsapp{width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:0}
+.btn-secondary.btn-neutro{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.5)}
+.btn-wa-outline{width:100%;padding:11px;border-radius:14px;border:1px solid rgba(37,211,102,0.3);background:rgba(37,211,102,0.08);color:#25d366;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* ---- Alertas ---- */
+.alerta-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(251,191,36,0.08);border-radius:12px;margin-bottom:8px;border-left:3px solid #fbbf24}
+.alerta-item-ico{font-size:20px}
+.alertas-pie{font-size:11px;color:rgba(255,255,255,0.35);text-align:center;margin-top:4px;margin-bottom:8px}
+
+/* ---- Pagos ---- */
+.card.card-modalidad{padding:10px 12px;margin-bottom:0;background:rgba(37,99,235,0.1);border-color:rgba(77,159,255,0.2)}
+.modalidad-precio{font-size:13px;font-weight:700;color:#4d9fff;margin-left:8px}
+select.select-extra{border-color:rgba(251,191,36,0.4)}
+.aviso-extra{font-size:11px;color:#fbbf24;margin-top:4px}
+.fila-mes{display:flex;gap:8px}
+.fila-mes select:first-child{flex:2}
+.fila-mes select:last-child{flex:1}
+.badge.badge-mr{margin-right:6px}
+
+/* ---- Calendario de Asistencia ---- */
+.cal-hero-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-hero-num{font-size:11px;font-weight:400;color:rgba(255,255,255,0.35)}
+.today-col .cal-hero-num{font-weight:700;color:#4d9fff}
+.cal-hero-slot.fes-slot{border-radius:8px;align-items:center;justify-content:center}
+.cal-hero-slot.is-hoy{background:rgba(37,99,235,0.08);border-radius:8px}
+.fes-slot-inner{text-align:center;padding:4px 0}
+.fes-slot-ico{font-size:16px}
+.fes-slot-txt{font-size:8px;font-weight:700;text-transform:uppercase;margin-top:2px}
+.turno-vacio{min-height:22px;border-radius:6px;margin-bottom:3px;display:flex;align-items:center;justify-content:center}
+.turno-vacio span{font-size:9px}
+.turno-vacio.t1{background:rgba(77,159,255,0.12)}
+.turno-vacio.t1 span{color:#4d9fff55}
+.turno-vacio.t2{background:rgba(251,146,60,0.12)}
+.turno-vacio.t2 span{color:#fb923c55}
+.cal-hero-event.t1{background:rgba(77,159,255,0.12);border-left:2px solid #4d9fff;margin-bottom:3px;color:#4d9fff}
+.cal-hero-event.t2{background:rgba(251,146,60,0.12);border-left:2px solid #fb923c;margin-bottom:3px;color:#fb923c}
+
+/* ---- Festivos (bloquear día) ---- */
+.fes-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.fes-ico-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.fes-nota{font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px}
+.fila-tipos{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.afectado-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:6px}
+.afectado-row.ambar{background:rgba(251,191,36,0.06)}
+.afectado-nombre{font-size:13px;color:#fff}
+.afectado-turno{font-size:11px;color:rgba(255,255,255,0.45);margin-left:auto}
+.btn-primary.btn-ambar{background:linear-gradient(135deg,#92400e,#d97706);margin-top:0}
+.evento-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.badge.badge-sinreg{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)}
+
+/* ---- Utilidades de espaciado (al final para que prevalezcan) ---- */
+.flex-1{flex:1}
+.min-w-0{min-width:0}
+.mt-0{margin-top:0}
+.mt-2{margin-top:2px}
+.mt-4{margin-top:4px}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-14{margin-top:14px}
+.mt-18{margin-top:18px}
+.mb-0{margin-bottom:0}
+.mb-10{margin-bottom:10px}
+.mb-14{margin-bottom:14px}

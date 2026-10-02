@@ -2,7 +2,7 @@ import { useState } from 'react'
 import CalendarioHero from '../components/CalendarioHero.jsx'
 import { todayStr } from '../utils/helpers'
 
-export default function Asistencia({ data, esFestivo, registrarSesion, eliminarSesion, showToast }) {
+export default function Asistencia({ data, esFestivo, registrarSesion, eliminarSesion, showToast, toastDeshacer }) {
   const { alumnos } = data
   const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
   const [fecha, setFecha] = useState(todayStr())
@@ -22,13 +22,13 @@ export default function Asistencia({ data, esFestivo, registrarSesion, eliminarS
       <div className="sec-label">Calendario</div>
       <CalendarioHero data={data} esFestivo={esFestivo} />
 
-      <div className="section-hero" style={{ marginTop: 18 }}>
+      <div className="section-hero mt-18">
         <div className="section-hero-header" onClick={() => setRegistrarOpen(o => !o)}>
           <div className="section-hero-left">
             <div className="section-hero-icon green">✓</div>
             <div className="section-hero-title">Registrar Asistencia</div>
           </div>
-          <div className="section-hero-toggle" style={{ transform: registrarOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+          <div className={'section-hero-toggle' + (registrarOpen ? ' is-open' : '')}>▾</div>
         </div>
 
         {registrarOpen ? (
@@ -52,19 +52,19 @@ export default function Asistencia({ data, esFestivo, registrarSesion, eliminarS
             </div>
             <button className="btn-primary" onClick={guardar}>Registrar asistencia</button>
 
-            <div style={{ marginTop: 14 }}>
+            <div className="mt-14">
               {!alumnoId ? null : !ses.length ? (
                 <p className="empty">Sin sesiones registradas</p>
               ) : (
                 <>
-                  <div className="sec-label" style={{ marginTop: 4 }}>Historial</div>
+                  <div className="sec-label mt-4">Historial</div>
                   {ses.map(s => (
                     <div className="hist-item" key={s.id}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{new Date(s.fecha + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+                      <div className="flex-1">
+                        <div className="txt-titulo">{new Date(s.fecha + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
                       </div>
                       <span className={'badge badge-' + s.estado}>{s.estado === 'presente' ? '✓ Presente' : s.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada'}</span>
-                      <button className="icon-btn" onClick={() => eliminarSesion(s.id)}>✕</button>
+                      <button className="icon-btn" onClick={() => toastDeshacer('Sesión eliminada', eliminarSesion(s.id))}>✕</button>
                     </div>
                   ))}
                 </>

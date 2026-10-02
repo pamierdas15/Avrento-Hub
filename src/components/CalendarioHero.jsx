@@ -27,7 +27,7 @@ export default function CalendarioHero({ data, esFestivo }) {
     <div className="cal-hero">
       <div className="cal-hero-header">
         <button className="cal-nav" onClick={() => setOffset(o => o - 1)} type="button">‹</button>
-        <span className="cal-hero-title" style={{ textTransform: 'none' }}>{label}</span>
+        <span className="cal-hero-title txt-normal">{label}</span>
         <button className="cal-nav" onClick={() => setOffset(o => o + 1)} type="button">›</button>
       </div>
 
@@ -39,7 +39,7 @@ export default function CalendarioHero({ data, esFestivo }) {
             <div className={'cal-hero-dia-hdr' + (isT ? ' today-col' : '')} key={i}>
               {isT ? <div className="cal-today-dot"></div> : null}
               <div>{DIAS_ES[d.getDay()]}</div>
-              <div style={{ fontSize: 11, fontWeight: isT ? 700 : 400, color: isT ? '#4d9fff' : 'rgba(255,255,255,0.35)' }}>{d.getDate()}</div>
+              <div className="cal-hero-num">{d.getDate()}</div>
             </div>
           )
         })}
@@ -48,7 +48,7 @@ export default function CalendarioHero({ data, esFestivo }) {
       {!alumnos.length ? (
         <p className="cal-empty-msg">Añade alumnos con día y hora para ver el calendario.</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 3 }}>
+        <div className="cal-hero-grid">
           {dates.map((d, i) => {
             const eventos = dayMap[d.getDay()] || []
             const iso = isoLocal(d)
@@ -57,26 +57,26 @@ export default function CalendarioHero({ data, esFestivo }) {
             if (fes) {
               const fc = FEST_CFG[fes.tipo]
               return (
-                <div key={i} className="cal-hero-slot" style={{ background: fc.bg, border: '1px solid ' + fc.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                    <div style={{ fontSize: 16 }}>{fc.ico}</div>
-                    <div style={{ fontSize: 8, color: fc.color, fontWeight: 700, textTransform: 'uppercase', marginTop: 2 }}>{fes.tipo.substring(0, 3)}</div>
+                <div key={i} className="cal-hero-slot fes-slot" style={{ background: fc.bg, border: '1px solid ' + fc.border }}>
+                  <div className="fes-slot-inner">
+                    <div className="fes-slot-ico">{fc.ico}</div>
+                    <div className="fes-slot-txt" style={{ color: fc.color }}>{fes.tipo.substring(0, 3)}</div>
                   </div>
                 </div>
               )
             }
             return (
-              <div key={i} className="cal-hero-slot" style={isT ? { background: 'rgba(37,99,235,0.08)', borderRadius: 8 } : undefined}>
+              <div key={i} className={'cal-hero-slot' + (isT ? ' is-hoy' : '')}>
                 {['17:00', '18:30'].map(turno => {
-                  const tc = turno === '17:00' ? { bg: 'rgba(77,159,255,0.12)', border: '#4d9fff', text: '#4d9fff' } : { bg: 'rgba(251,146,60,0.12)', border: '#fb923c', text: '#fb923c' }
+                  const t = turno === '17:00' ? 't1' : 't2'
                   const arr = eventos.filter(a => a.hora === turno)
                   if (!arr.length) {
-                    return <div key={turno} style={{ minHeight: 22, borderRadius: 6, background: tc.bg, marginBottom: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: tc.border + '55' }}>{turno}</span></div>
+                    return <div key={turno} className={'turno-vacio ' + t}><span>{turno}</span></div>
                   }
                   return arr.map(a => (
-                    <div className="cal-hero-event" key={a.id + turno} style={{ background: tc.bg, borderLeft: '2px solid ' + tc.border, marginBottom: 3 }}>
-                      <div className="ev-name" style={{ color: tc.text }}>{a.nombre.split(' ')[0]}</div>
-                      <div className="ev-hora" style={{ color: tc.text }}>{turno}</div>
+                    <div className={'cal-hero-event ' + t} key={a.id + turno}>
+                      <div className="ev-name">{a.nombre.split(' ')[0]}</div>
+                      <div className="ev-hora">{turno}</div>
                     </div>
                   ))
                 })}

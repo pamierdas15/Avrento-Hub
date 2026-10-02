@@ -55,7 +55,17 @@ volver a importar el proyecto ni configurar nada.
   Vercel (a diferencia de GitHub Pages, donde el proyecto vivía bajo `/avrentohub/`).
 - `vercel.json` fija las cabeceras correctas para `manifest.json` y `sw.js`.
 - Los datos de la app se guardan en `localStorage` del propio dispositivo (no en un servidor);
-  usa el botón **Backup** en la pestaña Resumen para exportar/restaurar un `.json` de seguridad.
+  usa el botón **Backup** en la pestaña Resumen para exportar/restaurar un `.json` de seguridad
+  (incluye festivos y plantillas de WhatsApp).
+- Cada pago cobrado guarda qué cubre (`cubre`: `mes`, `pack`, `sesion` o `extra`, y `unidades`),
+  calculado con el precio vigente al cobrarlo. Así, cambiar la tarifa o la modalidad de un alumno
+  no altera lo que ya estaba pagado. Los pagos antiguos se convierten solos al abrir la app.
+- Las fuentes (Work Sans, Bebas Neue, JetBrains Mono) van incluidas vía `@fontsource`: no
+  dependen de Google Fonts y funcionan sin conexión.
+- La librería de Excel (`xlsx`) se descarga solo al pulsar "Exportar Excel", para que la app
+  arranque más rápido.
+- Los estilos están en `src/styles.css`; en los componentes solo quedan inline los colores que
+  dependen de datos (color de cada alumno, tipo de festivo) y las posiciones de la barra inferior.
 
 ## Estructura
 

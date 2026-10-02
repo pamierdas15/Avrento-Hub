@@ -63,9 +63,9 @@ export default function WhatsappModal({ open, data, onClose, showToast }) {
 
   return (
     <Modal open={open}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(37,211,102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💬</div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Recordatorio de pago</div>
+      <div className="modal-head">
+        <div className="modal-ico ico-verde">💬</div>
+        <div className="modal-head-title">Recordatorio de pago</div>
       </div>
 
       <div className="inp-row">
@@ -76,18 +76,18 @@ export default function WhatsappModal({ open, data, onClose, showToast }) {
       </div>
 
       <div className="inp-row">
-        <label className="inp-label">Plantilla <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(usa {'{nombre}'}, {'{importe}'} y {'{pendientes}'})</span></label>
-        <textarea style={{ height: 100, fontSize: 13 }} value={plantilla} onChange={e => setPlantilla(e.target.value)}></textarea>
+        <label className="inp-label">Plantilla <span className="inp-label-hint">(usa {'{nombre}'}, {'{importe}'} y {'{pendientes}'})</span></label>
+        <textarea className="plantilla-txt" value={plantilla} onChange={e => setPlantilla(e.target.value)}></textarea>
       </div>
 
-      <div style={{ background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.15)', borderRadius: 12, padding: 12, marginBottom: 12 }}>
-        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>Vista previa</div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{preview}</div>
+      <div className="preview-box">
+        <div className="preview-label">Vista previa</div>
+        <div className="preview-txt">{preview}</div>
       </div>
 
-      <button onClick={enviar} style={{ width: '100%', padding: 12, borderRadius: 14, border: 'none', background: 'linear-gradient(135deg,#128c3e,#25d366)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 0 }}>📲 Abrir WhatsApp</button>
+      <button onClick={enviar} className="btn-whatsapp">📲 Abrir WhatsApp</button>
       <button className="btn-secondary" onClick={guardarPlantilla}>💾 Guardar plantilla de esta modalidad</button>
-      <button className="btn-secondary" onClick={onClose} style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}>Cancelar</button>
+      <button className="btn-secondary btn-neutro" onClick={onClose}>Cancelar</button>
     </Modal>
   )
 }

@@ -1,4 +1,4 @@
-const CACHE = 'avrento-hub-v6';
+const CACHE = 'avrento-hub-v7';
 const ASSETS = ['/', '/manifest.json', '/icon-192.png', '/icon-512.png', '/icon-maskable-512.png'];
 
 self.addEventListener('install', e => {

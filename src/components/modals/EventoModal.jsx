@@ -13,32 +13,32 @@ export default function EventoModal({ open, alumnoId, fecha, data, onClose, onRe
 
   return (
     <Modal open={open}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <div className="avatar" style={{ width: 40, height: 40, fontSize: 15, borderRadius: 11, background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
+      <div className="evento-head">
+        <div className="avatar avatar-40" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{a.nombre}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{a.curso || ''}{a.materia ? ' · ' + a.materia : ''}</div>
+          <div className="modal-head-title">{a.nombre}</div>
+          <div className="detalle-sub">{a.curso || ''}{a.materia ? ' · ' + a.materia : ''}</div>
         </div>
       </div>
-      <div className="rcard" style={{ marginBottom: 10 }}>
+      <div className="rcard mb-10">
         <div className="rl">Fecha</div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', textTransform: 'capitalize' }}>{fechaFmt}{a.hora ? ' · ' + a.hora : ''}</div>
+        <div className="txt-titulo txt-cap">{fechaFmt}{a.hora ? ' · ' + a.hora : ''}</div>
       </div>
-      <div className="rcard" style={{ marginBottom: 14 }}>
+      <div className="rcard mb-14">
         <div className="rl">Asistencia</div>
-        <div style={{ marginTop: 4 }}>
+        <div className="mt-4">
           {ses
             ? <span className={'badge badge-' + ses.estado}>{ses.estado === 'presente' ? '✓ Presente' : ses.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada'}</span>
-            : <span className="badge" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>Sin registrar</span>}
+            : <span className="badge badge-sinreg">Sin registrar</span>}
         </div>
       </div>
       {!ses ? (
         <>
-          <button className="btn-primary" style={{ marginTop: 0 }} onClick={() => onRegistrar(alumnoId, fecha, 'presente')}>✓ Marcar presente</button>
+          <button className="btn-primary mt-0" onClick={() => onRegistrar(alumnoId, fecha, 'presente')}>✓ Marcar presente</button>
           <button className="btn-secondary" onClick={() => onRegistrar(alumnoId, fecha, 'ausente')}>✗ Marcar ausente</button>
         </>
       ) : null}
-      <button className="btn-secondary" onClick={onClose} style={{ marginTop: 10 }}>Cerrar</button>
+      <button className="btn-secondary mt-10" onClick={onClose}>Cerrar</button>
     </Modal>
   )
 }

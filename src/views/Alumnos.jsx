@@ -9,14 +9,14 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
   const pack = getClasesPackInfo(data, a)
   const inactivo = (a.estado || 'activo') !== 'activo'
   return (
-    <div className="card" onClick={() => onVerDetalle(a.id)} style={inactivo ? { opacity: 0.45 } : undefined}>
+    <div className={'card' + (inactivo ? ' is-inactivo' : '')} onClick={() => onVerDetalle(a.id)}>
       <div className="card-row">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+        <div className="alumno-card-main">
           <div className="avatar" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <div className="min-w-0">
+            <div className="alumno-name-row">
               <div className="alumno-name">{a.nombre}</div>
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 10, background: eb.bg, color: eb.color }}>{eb.txt}</span>
+              <span className={'estado-pill ' + eb.cls}>{eb.txt}</span>
             </div>
             <div className="alumno-meta">
               {a.curso || ''}{a.materia ? ' · ' + a.materia : ''}
@@ -25,10 +25,10 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+        <div className="alumno-card-side">
           <span className={'badge ' + MODALIDAD_CFG[a.modalidad || 'fija'].badgeClass}>{MODALIDAD_CFG[a.modalidad || 'fija'].label}</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#4d9fff' }}>{fmt(a[MODALIDAD_CFG[a.modalidad || 'fija'].campo]) + MODALIDAD_CFG[a.modalidad || 'fija'].suffix}</span>
-          {pack ? <span style={{ fontSize: 10, fontWeight: 700, color: '#2dd4bf' }}>{pack.restantes}/{pack.total} clases</span> : null}
+          <span className="precio-txt">{fmt(a[MODALIDAD_CFG[a.modalidad || 'fija'].campo]) + MODALIDAD_CFG[a.modalidad || 'fija'].suffix}</span>
+          {pack ? <span className="pack-txt">{pack.restantes}/{pack.total} clases</span> : null}
         </div>
       </div>
     </div>
@@ -43,17 +43,17 @@ function ListaRegistros({ items, abiertaId, setAbiertaId, onMarcar, onEliminar, 
     const hecho = !!it.completada
     return (
       <div key={key} className="tarea-perfil-item tarea-perfil-row">
-        <div className="mini-hero-click" style={{ cursor: 'pointer', opacity: hecho ? 0.55 : 1 }} onClick={() => setAbiertaId(abierta ? null : key)}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: hecho ? 'line-through' : 'none' }}>{hecho ? '✓ ' : ''}{it.tarea}</span>
-            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+        <div className={'mini-hero-click' + (hecho ? ' is-hecho' : '')} onClick={() => setAbiertaId(abierta ? null : key)}>
+          <div className="registro-head">
+            <span className={'registro-titulo' + (hecho ? ' tachado' : '')}>{hecho ? '✓ ' : ''}{it.tarea}</span>
+            <span className="registro-fecha">
               {new Date(it.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </div>
-          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{it.alumnoNombre}</div>
-          {abierta && it.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{it.evento}</div> : null}
+          <div className="registro-alumno">{it.alumnoNombre}</div>
+          {abierta && it.evento ? <div className="registro-desc">{it.evento}</div> : null}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+        <div className="registro-acciones">
           <button
             className={'tarea-realizada-btn' + (hecho ? ' tarea-realizada-btn-done' : '')}
             onClick={e => { e.stopPropagation(); onMarcar(it.alumnoId, it.id, !hecho) }}
@@ -65,7 +65,7 @@ function ListaRegistros({ items, abiertaId, setAbiertaId, onMarcar, onEliminar, 
   })
 }
 
-export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTarea, onMarcarTarea, onEliminarTarea, onGuardarEvento, onMarcarEvento, onEliminarEvento, showToast }) {
+export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTarea, onMarcarTarea, onEliminarTarea, onGuardarEvento, onMarcarEvento, onEliminarEvento, showToast, toastDeshacer }) {
   const [termino, setTermino] = useState('')
   const [activosOpen, setActivosOpen] = useState(false)
   const [inactivosOpen, setInactivosOpen] = useState(false)
@@ -93,8 +93,8 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
   }
 
   function eliminarTareaLocal(alumnoId, tareaId) {
-    onEliminarTarea && onEliminarTarea(alumnoId, tareaId)
-    showToast && showToast('Tarea eliminada')
+    const deshacer = onEliminarTarea(alumnoId, tareaId)
+    toastDeshacer('Tarea eliminada', deshacer)
   }
 
   function marcarEventoLocal(alumnoId, eventoId, completada) {
@@ -103,8 +103,8 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
   }
 
   function eliminarEventoLocal(alumnoId, eventoId) {
-    onEliminarEvento && onEliminarEvento(alumnoId, eventoId)
-    showToast && showToast('Evento eliminado')
+    const deshacer = onEliminarEvento(alumnoId, eventoId)
+    toastDeshacer('Evento eliminado', deshacer)
   }
 
   const tareas = (data.alumnos || []).flatMap(a =>
@@ -117,10 +117,10 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
 
   return (
     <div className="section-pad">
-      <button onClick={onNuevoAlumno} className="btn-primary" style={{ marginTop: 0, marginBottom: 12 }}>Nuevo Alumno</button>
-      <div style={{ position: 'relative', marginBottom: 12 }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar alumno..." value={termino} onChange={e => setTermino(e.target.value)} style={{ paddingLeft: 34 }} />
+      <button onClick={onNuevoAlumno} className="btn-primary btn-top">Nuevo Alumno</button>
+      <div className="buscador">
+        <svg className="buscador-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar alumno..." value={termino} onChange={e => setTermino(e.target.value)} />
       </div>
 
       <div className="section-hero">
@@ -130,7 +130,7 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
             <div className="section-hero-title">Alumnos Activos</div>
             <span className="section-hero-count">{activos.length}</span>
           </div>
-          <div className="section-hero-toggle" style={{ transform: activosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+          <div className={'section-hero-toggle' + (activosOpen ? ' is-open' : '')}>▾</div>
         </div>
         {activosOpen ? (
           <div className="section-hero-body">
@@ -148,7 +148,7 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
             <div className="section-hero-title">Alumnos Inactivos</div>
             <span className="section-hero-count">{inactivos.length}</span>
           </div>
-          <div className="section-hero-toggle" style={{ transform: inactivosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+          <div className={'section-hero-toggle' + (inactivosOpen ? ' is-open' : '')}>▾</div>
         </div>
         {inactivosOpen ? (
           <div className="section-hero-body">
@@ -166,11 +166,11 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
             <div className="section-hero-title">Tareas</div>
             <span className="section-hero-count">{tareas.length}</span>
           </div>
-          <div className="section-hero-toggle" style={{ transform: tareasOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+          <div className={'section-hero-toggle' + (tareasOpen ? ' is-open' : '')}>▾</div>
         </div>
         {tareasOpen ? (
           <div className="section-hero-body">
-            <button className="btn-secondary" style={{ marginBottom: 10 }} onClick={() => setNuevaTareaOpen(true)}>+ Nueva tarea</button>
+            <button className="btn-secondary btn-mb" onClick={() => setNuevaTareaOpen(true)}>+ Nueva tarea</button>
             <ListaRegistros
               items={tareas}
               abiertaId={tareaAbiertaId}
@@ -190,11 +190,11 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTa
             <div className="section-hero-title">Eventos Próximos</div>
             <span className="section-hero-count">{eventos.length}</span>
           </div>
-          <div className="section-hero-toggle" style={{ transform: eventosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+          <div className={'section-hero-toggle' + (eventosOpen ? ' is-open' : '')}>▾</div>
         </div>
         {eventosOpen ? (
           <div className="section-hero-body">
-            <button className="btn-secondary" style={{ marginBottom: 10 }} onClick={() => setNuevoEventoOpen(true)}>+ Nuevo evento</button>
+            <button className="btn-secondary btn-mb" onClick={() => setNuevoEventoOpen(true)}>+ Nuevo evento</button>
             <ListaRegistros
               items={eventos}
               abiertaId={eventoAbiertoId}

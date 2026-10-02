@@ -21,11 +21,11 @@ export default function TareaPendienteHero({ alumnoId, onGuardar, showToast }) {
     <div className="mini-hero">
       <div className="mini-hero-label mini-hero-toggle" onClick={() => setOpen(o => !o)}>
         <span>📝 Tareas Pendientes</span>
-        <span style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+        <span className={'rot' + (open ? ' is-open' : '')}>▾</span>
       </div>
 
       {open ? (
-        <div style={{ marginTop: 8 }}>
+        <div className="mini-hero-body">
           <div className="inp-row">
             <label className="inp-label">Tarea</label>
             <input type="text" placeholder="Título de la tarea" value={tarea} onChange={e => setTarea(e.target.value)} />

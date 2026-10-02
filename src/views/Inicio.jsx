@@ -50,65 +50,58 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
 
   function regDesdeInicio(alumnoId) {
     const ok = registrarSesion(alumnoId, selISO, 'presente')
-    if (ok) showToast('Asistencia registrada')
+    showToast(ok ? 'Asistencia registrada' : 'Ya existe un registro para esta fecha')
   }
 
   return (
     <div className="section-pad">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 18 }}>
+      <div className="quick-grid">
         <button className="quick-btn" onClick={onNuevoAlumno}>
-          <div className="qico" style={{ background: 'rgba(37,99,235,0.2)' }}>
+          <div className="qico qico-azul">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4d9fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>Nuevo alumno</span>
+          <span className="quick-label">Nuevo alumno</span>
         </button>
         <button className="quick-btn" onClick={() => onGoTab('asistencia')}>
-          <div className="qico" style={{ background: 'rgba(29,158,117,0.2)' }}>
+          <div className="qico qico-verde">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>Reg. clase</span>
+          <span className="quick-label">Reg. clase</span>
         </button>
         <button className="quick-btn" onClick={() => onGoTab('pagos')}>
-          <div className="qico" style={{ background: 'rgba(124,58,237,0.2)' }}>
+          <div className="qico qico-morado">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>Reg. pago</span>
+          <span className="quick-label">Reg. pago</span>
         </button>
       </div>
 
       {alertas.length ? (
-        <div
-          style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 14, padding: '12px 14px', marginBottom: 16, cursor: 'pointer' }}
-          onClick={onVerAlertas}
-        >
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#fbbf24', marginBottom: 4 }}>⚠ {alertas.length} alerta{alertas.length > 1 ? 's' : ''} de pago</div>
+        <div className="alerta-box" onClick={onVerAlertas}>
+          <div className="alerta-box-title">⚠ {alertas.length} alerta{alertas.length > 1 ? 's' : ''} de pago</div>
           {alertas.slice(0, 2).map((al, i) => (
-            <div key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
+            <div key={i} className="alerta-box-item">
               · {al.nombre} — {al.count} pago{al.count > 1 ? 's' : ''} pendiente{al.count > 1 ? 's' : ''}
             </div>
           ))}
-          {alertas.length > 2 ? <div style={{ fontSize: 11, color: '#fbbf24', marginTop: 2 }}>Ver todas →</div> : null}
+          {alertas.length > 2 ? <div className="alerta-box-more">Ver todas →</div> : null}
         </div>
       ) : (
-        <div style={{ background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.15)', borderRadius: 14, padding: '10px 14px', marginBottom: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#34d399' }}>✓ Sin alertas de pago pendientes</div>
+        <div className="ok-box">
+          <div className="ok-box-title">✓ Sin alertas de pago pendientes</div>
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div className="sec-label" style={{ marginBottom: 0 }}>Semana · <span style={{ textTransform: 'none' }}>{weekLabel}</span></div>
+      <div className="semana-header">
+        <div className="sec-label mb-0">Semana · <span className="txt-normal">{weekLabel}</span></div>
         {weekOffset !== 0 ? (
-          <button onClick={irAHoy} style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', background: 'var(--accent-soft)', border: '1px solid var(--accent-line)', borderRadius: 999, padding: '3px 9px', cursor: 'pointer' }}>Hoy</button>
+          <button onClick={irAHoy} className="hoy-btn">Hoy</button>
         ) : null}
       </div>
 
-      <div
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '10px 6px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 2, touchAction: 'pan-y' }}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <button onClick={() => cambiarSemana(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 16, padding: '0 4px', cursor: 'pointer', flexShrink: 0 }}>‹</button>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, flex: 1 }}>
+      <div className="semana-strip" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <button onClick={() => cambiarSemana(-1)} className="semana-nav">‹</button>
+        <div className="semana-grid">
           {sem.map((dia, i) => {
             const iso = isoLocal(dia)
             const esH = iso === hoyISO
@@ -116,47 +109,47 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
             const tieneC = data.alumnos.some(a => (a.dias || []).includes(String(dia.getDay())))
             const fes = esFestivo(iso)
             return (
-              <button key={i} onClick={() => setSelectedIdx(i)} style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}>
-                <div style={{ fontSize: 9, color: esSel ? '#4d9fff' : 'rgba(255,255,255,0.4)', fontWeight: esSel || esH ? 700 : 400, textTransform: 'uppercase' }}>{DIAS_ES[dia.getDay()]}</div>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', margin: '3px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', background: esSel ? 'linear-gradient(135deg,#1a4fd6,#2563eb)' : 'transparent', border: esSel ? 'none' : esH ? '1px solid rgba(77,159,255,0.5)' : '1px solid rgba(255,255,255,0.08)', boxShadow: esSel ? '0 4px 12px rgba(77,159,255,0.4)' : 'none' }}>
-                  <span style={{ fontSize: 11, fontWeight: esSel ? 700 : 400, color: esSel ? '#fff' : esH ? '#4d9fff' : 'rgba(255,255,255,0.65)' }}>{dia.getDate()}</span>
+              <button key={i} onClick={() => setSelectedIdx(i)} className="semana-dia">
+                <div className={'semana-dow' + (esSel ? ' is-sel' : '') + (esSel || esH ? ' is-bold' : '')}>{DIAS_ES[dia.getDay()]}</div>
+                <div className={'semana-num' + (esH ? ' is-hoy' : '') + (esSel ? ' is-sel' : '')}>
+                  <span className="semana-num-txt">{dia.getDate()}</span>
                 </div>
                 {fes
-                  ? <div style={{ fontSize: 10, textAlign: 'center' }}>{FEST_CFG[fes.tipo].ico}</div>
+                  ? <div className="semana-fes">{FEST_CFG[fes.tipo].ico}</div>
                   : tieneC
-                    ? <div style={{ width: 4, height: 4, borderRadius: '50%', background: esSel ? '#4d9fff' : 'rgba(77,159,255,0.5)', margin: '2px auto' }}></div>
-                    : <div style={{ height: 6 }}></div>}
+                    ? <div className={'semana-dot' + (esSel ? ' is-sel' : '')}></div>
+                    : <div className="semana-vacio"></div>}
               </button>
             )
           })}
         </div>
-        <button onClick={() => cambiarSemana(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 16, padding: '0 4px', cursor: 'pointer', flexShrink: 0 }}>›</button>
+        <button onClick={() => cambiarSemana(1)} className="semana-nav">›</button>
       </div>
 
-      <div className="sec-label">Clases · <span style={{ textTransform: 'capitalize', fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>{nombreDiaSel}</span></div>
+      <div className="sec-label">Clases · <span className="sec-label-dia">{nombreDiaSel}</span></div>
       {fesSel ? (
         <div className="empty">{FEST_CFG[fesSel.tipo].ico} {FEST_CFG[fesSel.tipo].label}{fesSel.nota ? ' · ' + fesSel.nota : ''}</div>
       ) : clasesDia.length ? clasesDia.map(a => {
         const idx = data.alumnos.indexOf(a)
         const sesH = data.sesiones.find(s => s.alumnoId === a.id && s.fecha === selISO)
-        const tc = a.hora === '17:00' ? { border: 'rgba(77,159,255,0.5)', text: '#4d9fff' } : a.hora === '18:30' ? { border: 'rgba(251,146,60,0.5)', text: '#fb923c' } : { border: 'rgba(255,255,255,0.15)', text: 'rgba(255,255,255,0.7)' }
+        const turno = a.hora === '17:00' ? 't1' : a.hora === '18:30' ? 't2' : 'sin'
         const expanded = expandedId === a.id
         return (
-          <div className="card" key={a.id} style={{ borderLeft: '3px solid ' + tc.border }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setExpandedId(expanded ? null : a.id)}>
-              <div className="avatar" style={{ width: 36, height: 36, fontSize: 12, borderRadius: 10, background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{a.nombre}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>
-                  {a.curso || ''}{a.hora ? <> · <span style={{ color: tc.text }}>{TURNOS[a.hora] || a.hora}</span></> : null}
+          <div className={'card turno-' + turno} key={a.id}>
+            <div className="clase-head" onClick={() => setExpandedId(expanded ? null : a.id)}>
+              <div className="avatar avatar-36" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
+              <div className="flex-1">
+                <div className="txt-titulo">{a.nombre}</div>
+                <div className="clase-meta">
+                  {a.curso || ''}{a.hora ? <> · <span className={'turno-' + turno + '-txt'}>{TURNOS[a.hora] || a.hora}</span></> : null}
                 </div>
               </div>
               {sesH ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span> : null}
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+              <span className={'clase-chevron rot' + (expanded ? ' is-open' : '')}>▾</span>
             </div>
 
             {expanded ? (
-              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="clase-body">
                 <div className="mini-btn-row">
                   <button
                     className={'mini-btn mini-btn-asistencia' + (sesH ? ' mini-btn-done' : '')}
