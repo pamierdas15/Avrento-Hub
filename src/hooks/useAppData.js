@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { SK, FES_SK } from '../utils/constants'
 import { todayStr } from '../utils/helpers'
+import { restaurarPlantillas } from '../utils/backup'
 
 function loadData() {
   const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {} }
@@ -97,8 +98,13 @@ export function useAppData() {
   const esFestivo = useCallback((iso) => festivos.find(f => f.fecha === iso) || null, [festivos])
 
   // ---- Backup ----
-  const restaurarBackup = useCallback((nuevaData) => {
-    setData({ tareas: {}, eventos: {}, ...nuevaData })
+  // "extra" (backups version 2+) trae también festivos y plantillas de WhatsApp.
+  const restaurarBackup = useCallback((nuevaData, extra) => {
+    setData({ alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, ...nuevaData })
+    if (extra) {
+      if (Array.isArray(extra.festivos)) setFestivos(extra.festivos)
+      restaurarPlantillas(extra)
+    }
   }, [])
 
   // ---- Tareas pendientes (por alumno) ----

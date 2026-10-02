@@ -37,9 +37,9 @@ export default function BackupModal({ open, data, onClose, onRestaurar, showToas
         const b = JSON.parse(ev.target.result)
         if (!b.app || b.app !== 'AvrentoHub' || !b.data) { showToast('Archivo no válido'); return }
         if (!confirm(`¿Restaurar backup del ${new Date(b.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}?`)) return
-        onRestaurar(b.data)
+        onRestaurar(b.data, b.extra)
         onClose()
-        showToast('Datos restaurados')
+        showToast(b.extra ? 'Datos, festivos y plantillas restaurados' : 'Datos restaurados (backup antiguo, sin festivos ni plantillas)')
       } catch {
         showToast('Error al leer el archivo')
       }

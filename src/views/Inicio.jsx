@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { DIAS_ES, MESES, TURNOS, FEST_CFG } from '../utils/constants'
-import { todayStr, initials, alumnoColor, getWeekDates } from '../utils/helpers'
+import { todayStr, isoLocal, initials, alumnoColor, getWeekDates } from '../utils/helpers'
 import { getAlertas } from '../utils/business'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
 import EventoProximoHero from '../components/EventoProximoHero.jsx'
@@ -18,7 +18,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
 
   const sem = getWeekDates(weekOffset)
   const selDate = sem[selectedIdx]
-  const selISO = selDate.toISOString().slice(0, 10)
+  const selISO = isoLocal(selDate)
   const selDow = selDate.getDay()
   const esSelHoy = selISO === hoyISO
   const nombreDiaSel = esSelHoy ? 'Hoy' : selDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -110,7 +110,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
         <button onClick={() => cambiarSemana(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 16, padding: '0 4px', cursor: 'pointer', flexShrink: 0 }}>‹</button>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, flex: 1 }}>
           {sem.map((dia, i) => {
-            const iso = dia.toISOString().slice(0, 10)
+            const iso = isoLocal(dia)
             const esH = iso === hoyISO
             const esSel = i === selectedIdx
             const tieneC = data.alumnos.some(a => (a.dias || []).includes(String(dia.getDay())))

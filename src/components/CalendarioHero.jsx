@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { DIAS_ES, MESES, FEST_CFG } from '../utils/constants'
-import { getWeekDates, todayStr } from '../utils/helpers'
+import { getWeekDates, todayStr, isoLocal } from '../utils/helpers'
 
 // Calendario semanal en formato "hero": siempre visible dentro de Asistencia,
 // muestra los alumnos asignados a cada día de la semana (igual que la antigua
@@ -33,7 +33,7 @@ export default function CalendarioHero({ data, esFestivo }) {
 
       <div className="cal-hero-dias">
         {dates.map((d, i) => {
-          const iso = d.toISOString().slice(0, 10)
+          const iso = isoLocal(d)
           const isT = iso === todayISO
           return (
             <div className={'cal-hero-dia-hdr' + (isT ? ' today-col' : '')} key={i}>
@@ -51,7 +51,7 @@ export default function CalendarioHero({ data, esFestivo }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 3 }}>
           {dates.map((d, i) => {
             const eventos = dayMap[d.getDay()] || []
-            const iso = d.toISOString().slice(0, 10)
+            const iso = isoLocal(d)
             const isT = iso === todayISO
             const fes = esFestivo ? esFestivo(iso) : null
             if (fes) {

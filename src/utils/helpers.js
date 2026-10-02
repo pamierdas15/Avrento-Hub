@@ -1,6 +1,12 @@
 import { COLORS } from './constants'
 
-export const todayStr = () => new Date().toISOString().slice(0, 10)
+// Fecha en formato AAAA-MM-DD según la hora LOCAL del dispositivo.
+// (toISOString() usa UTC: en España, entre las 00:00 y las 02:00, devolvía
+// todavía el día anterior y descuadraba asistencia, pagos y el "hoy".)
+export const isoLocal = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+export const todayStr = () => isoLocal()
 
 export const fmt = n => (+n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
 
