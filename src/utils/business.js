@@ -258,3 +258,24 @@ export function getPendienteFmt(d, alumnoId) {
   if (!a) return '0,00 €'
   return fmt(getResumenPendiente(d, a).importe)
 }
+
+// Último pago "recibido" (cobrado) de un alumno, el más reciente por fecha.
+// Se usa para rellenar el mensaje de confirmación de pago.
+export function getUltimoPagoRecibido(d, alumnoId) {
+  const pagos = d.pagos
+    .filter(p => p.alumnoId === alumnoId && p.tipo === 'recibido')
+    .slice()
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
+  return pagos[0] || null
+}
+
+// Texto legible de "a qué mes/periodo corresponde" un pago, para el mensaje
+// de confirmación: el mes correspondiente si es una mensualidad, o si no, su concepto.
+export function formatoMensualidadPago(pago) {
+  if (!pago) return ''
+  if (pago.mesCorrespondiente) {
+    const [y, m] = pago.mesCorrespondiente.split('-').map(Number)
+    return `${capitaliza(MESES[m - 1])} ${y}`
+  }
+  return pago.concepto || ''
+}

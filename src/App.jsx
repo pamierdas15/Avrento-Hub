@@ -12,6 +12,7 @@ import DetalleModal from './components/modals/DetalleModal.jsx'
 import AlertasModal from './components/modals/AlertasModal.jsx'
 import BackupModal from './components/modals/BackupModal.jsx'
 import WhatsappModal from './components/modals/WhatsappModal.jsx'
+import ConfirmacionPagoModal from './components/modals/ConfirmacionPagoModal.jsx'
 import { useAppData } from './hooks/useAppData.js'
 import { useToast } from './hooks/useToast.js'
 import { getAlertas } from './utils/business.js'
@@ -41,6 +42,10 @@ export default function App() {
 
   // Modal: whatsapp
   const [waOpen, setWaOpen] = useState(false)
+
+  // Modal: confirmación de pago (whatsapp)
+  const [confirmPagoOpen, setConfirmPagoOpen] = useState(false)
+  const [confirmPagoAlumnoId, setConfirmPagoAlumnoId] = useState(null)
 
   // Alumno a preseleccionar al entrar en Pagos desde el hero de Inicio
   const [pagosPreselect, setPagosPreselect] = useState(null)
@@ -158,6 +163,7 @@ export default function App() {
             eliminarPago={store.eliminarPago}
             showToast={showToast}
             onAbrirWhatsapp={() => setWaOpen(true)}
+            onAbrirConfirmacion={(id) => { setConfirmPagoAlumnoId(id); setConfirmPagoOpen(true) }}
             preselectAlumnoId={pagosPreselect}
           />
         )
@@ -213,6 +219,14 @@ export default function App() {
       />
 
       <WhatsappModal open={waOpen} data={data} onClose={() => setWaOpen(false)} showToast={showToast} />
+
+      <ConfirmacionPagoModal
+        open={confirmPagoOpen}
+        data={data}
+        alumnoId={confirmPagoAlumnoId}
+        onClose={() => setConfirmPagoOpen(false)}
+        showToast={showToast}
+      />
 
       <Toast msg={msg} show={show} />
     </div>

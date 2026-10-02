@@ -1,5 +1,6 @@
 export const SK = 'avrento_hub_v1'
 export const WA_SK = 'avrento_wa'
+export const WA_CONFIRM_SK = 'avrento_wa_confirmacion'
 export const FES_SK = 'avrento_festivos'
 export const BACKUP_SK = 'avrento_ultimo_backup'
 export const AUTO_BACKUP_SK = 'avrento_auto_backup_on'
@@ -46,6 +47,10 @@ export const WA_DEFAULTS = {
   pack: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago un nuevo pack de clases, que corresponde a {pendientes}, con un importe de {importe}. Gracias de antemano.',
   sesion: 'Muy buenas {nombre}. Solo quería recordarte que está pendiente de pago el importe de {importe}, que corresponde a {pendientes}. Gracias de antemano.'
 }
+
+// Plantilla de confirmación de pago (mensaje de WhatsApp tras registrar un
+// cobro). Placeholders disponibles: {nombre}, {importe}, {mensualidad}
+export const WA_CONFIRM_DEFAULT = 'Buenas, {nombre}👋! Pago de {importe} €, correspondiente al {mensualidad}, recibido correctamente. ¡Muchas gracias! 👍'
 
 // Modalidades de pago disponibles para un alumno
 export const MODALIDAD_CFG = {
