@@ -32,9 +32,9 @@ html,body{height:100%;background:#04060c;color:#fff}
 
 /* ---- Cabecera global (logo + título de pestaña + icono flotante) ---- */
 .header-bar{position:relative;flex-shrink:0}
-/* Mismo fondo que el pie (barra de pestañas). Es opaco para que el brillo azul
-   del fondo de la app no se trasluzca y la cabecera se vea igual que el pie. */
-.header-bar-bg{position:absolute;inset:0;background:#05080f;border-bottom:1px solid var(--line);clip-path:url(#header-notch-clip)}
+/* Mismo tono que el pie (barra de pestañas), con un 10 % de transparencia
+   (90 % de opacidad): deja intuir ligeramente el fondo de la app. */
+.header-bar-bg{position:absolute;inset:0;background:rgba(5,8,15,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);clip-path:url(#header-notch-clip)}
 .header-bar-content{position:relative;height:56px}
 .header-app-pos{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:10px;white-space:nowrap}
 .header-tab-pos{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:flex;align-items:center;white-space:nowrap}
