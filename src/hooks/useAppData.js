@@ -102,11 +102,11 @@ export function useAppData() {
   }, [])
 
   // ---- Tareas pendientes (por alumno) ----
-  // Cada alumno acumula una lista de tareas: { id, tarea, evento, fecha }
+  // Cada alumno acumula una lista de tareas: { id, tarea, evento, fecha, completada }
   const guardarTarea = useCallback((alumnoId, { tarea, evento, fecha }) => {
     setData(d => {
       const actuales = (d.tareas && d.tareas[alumnoId]) || []
-      const nueva = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr() }
+      const nueva = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr(), completada: false }
       return { ...d, tareas: { ...(d.tareas || {}), [alumnoId]: [...actuales, nueva] } }
     })
   }, [])
@@ -118,13 +118,21 @@ export function useAppData() {
     })
   }, [])
 
+  // Marca/desmarca una tarea como realizada sin eliminarla de la lista.
+  const marcarTarea = useCallback((alumnoId, tareaId, completada) => {
+    setData(d => {
+      const actuales = (d.tareas && d.tareas[alumnoId]) || []
+      return { ...d, tareas: { ...(d.tareas || {}), [alumnoId]: actuales.map(t => t.id === tareaId ? { ...t, completada } : t) } }
+    })
+  }, [])
+
   // ---- Eventos próximos (por alumno) ----
   // Misma mecánica que las tareas pendientes: cada alumno acumula una lista
-  // de eventos { id, tarea, evento, fecha } (mismos campos: título, descripción y fecha).
+  // de eventos { id, tarea, evento, fecha, completada } (mismos campos: título, descripción, fecha).
   const guardarEvento = useCallback((alumnoId, { tarea, evento, fecha }) => {
     setData(d => {
       const actuales = (d.eventos && d.eventos[alumnoId]) || []
-      const nuevo = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr() }
+      const nuevo = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr(), completada: false }
       return { ...d, eventos: { ...(d.eventos || {}), [alumnoId]: [...actuales, nuevo] } }
     })
   }, [])
@@ -133,6 +141,14 @@ export function useAppData() {
     setData(d => {
       const actuales = (d.eventos && d.eventos[alumnoId]) || []
       return { ...d, eventos: { ...(d.eventos || {}), [alumnoId]: actuales.filter(e => e.id !== eventoId) } }
+    })
+  }, [])
+
+  // Marca/desmarca un evento como realizado sin eliminarlo de la lista.
+  const marcarEvento = useCallback((alumnoId, eventoId, completada) => {
+    setData(d => {
+      const actuales = (d.eventos && d.eventos[alumnoId]) || []
+      return { ...d, eventos: { ...(d.eventos || {}), [alumnoId]: actuales.map(e => e.id === eventoId ? { ...e, completada } : e) } }
     })
   }, [])
 
@@ -151,7 +167,9 @@ export function useAppData() {
     restaurarBackup,
     guardarTarea,
     eliminarTarea,
+    marcarTarea,
     guardarEvento,
-    eliminarEvento
+    eliminarEvento,
+    marcarEvento
   }
 }

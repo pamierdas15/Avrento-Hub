@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { estadoCfg, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
 import { initials, alumnoColor, fmt } from '../utils/helpers'
 import { getClasesPackInfo } from '../utils/business'
+import NuevoRegistroModal from '../components/modals/NuevoRegistroModal.jsx'
 
 function AlumnoCard({ a, idx, data, onVerDetalle }) {
   const eb = estadoCfg(a.estado || 'activo')
@@ -34,16 +35,17 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
   )
 }
 
-function ListaRegistros({ items, abiertaId, setAbiertaId, onCompletar, etiquetaBoton }) {
+function ListaRegistros({ items, abiertaId, setAbiertaId, onMarcar, onEliminar, etiquetaHecho }) {
   if (!items.length) return <p className="empty">Sin registros.</p>
   return items.map(it => {
     const key = it.alumnoId + '-' + it.id
     const abierta = abiertaId === key
+    const hecho = !!it.completada
     return (
       <div key={key} className="tarea-perfil-item tarea-perfil-row">
-        <div className="mini-hero-click" style={{ cursor: 'pointer' }} onClick={() => setAbiertaId(abierta ? null : key)}>
+        <div className="mini-hero-click" style={{ cursor: 'pointer', opacity: hecho ? 0.55 : 1 }} onClick={() => setAbiertaId(abierta ? null : key)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{it.tarea}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', textDecoration: hecho ? 'line-through' : 'none' }}>{hecho ? '✓ ' : ''}{it.tarea}</span>
             <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
               {new Date(it.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
@@ -51,16 +53,19 @@ function ListaRegistros({ items, abiertaId, setAbiertaId, onCompletar, etiquetaB
           <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{it.alumnoNombre}</div>
           {abierta && it.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{it.evento}</div> : null}
         </div>
-        <button
-          className="tarea-realizada-btn"
-          onClick={e => { e.stopPropagation(); onCompletar(it.alumnoId, it.id) }}
-        >{etiquetaBoton}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          <button
+            className={'tarea-realizada-btn' + (hecho ? ' tarea-realizada-btn-done' : '')}
+            onClick={e => { e.stopPropagation(); onMarcar(it.alumnoId, it.id, !hecho) }}
+          >{hecho ? '↺ Deshacer' : etiquetaHecho}</button>
+          <button className="icon-btn" onClick={e => { e.stopPropagation(); onEliminar(it.alumnoId, it.id) }}>✕</button>
+        </div>
       </div>
     )
   })
 }
 
-export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletarTarea, onCompletarEvento, showToast }) {
+export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onGuardarTarea, onMarcarTarea, onEliminarTarea, onGuardarEvento, onMarcarEvento, onEliminarEvento, showToast }) {
   const [termino, setTermino] = useState('')
   const [activosOpen, setActivosOpen] = useState(false)
   const [inactivosOpen, setInactivosOpen] = useState(false)
@@ -68,6 +73,8 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
   const [eventosOpen, setEventosOpen] = useState(false)
   const [tareaAbiertaId, setTareaAbiertaId] = useState(null)
   const [eventoAbiertoId, setEventoAbiertoId] = useState(null)
+  const [nuevaTareaOpen, setNuevaTareaOpen] = useState(false)
+  const [nuevoEventoOpen, setNuevoEventoOpen] = useState(false)
   const { alumnos } = data
   const t = termino.toLowerCase().trim()
   const lista = alumnos.filter(a =>
@@ -80,14 +87,24 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
   const activos = lista.filter(a => (a.estado || 'activo') === 'activo')
   const inactivos = lista.filter(a => (a.estado || 'activo') !== 'activo')
 
-  function completarTarea(alumnoId, tareaId) {
-    onCompletarTarea && onCompletarTarea(alumnoId, tareaId)
-    showToast && showToast('Tarea completada')
+  function marcarTareaLocal(alumnoId, tareaId, completada) {
+    onMarcarTarea && onMarcarTarea(alumnoId, tareaId, completada)
+    showToast && showToast(completada ? 'Tarea completada' : 'Tarea marcada como pendiente')
   }
 
-  function completarEvento(alumnoId, eventoId) {
-    onCompletarEvento && onCompletarEvento(alumnoId, eventoId)
-    showToast && showToast('Evento completado')
+  function eliminarTareaLocal(alumnoId, tareaId) {
+    onEliminarTarea && onEliminarTarea(alumnoId, tareaId)
+    showToast && showToast('Tarea eliminada')
+  }
+
+  function marcarEventoLocal(alumnoId, eventoId, completada) {
+    onMarcarEvento && onMarcarEvento(alumnoId, eventoId, completada)
+    showToast && showToast(completada ? 'Evento completado' : 'Evento marcado como pendiente')
+  }
+
+  function eliminarEventoLocal(alumnoId, eventoId) {
+    onEliminarEvento && onEliminarEvento(alumnoId, eventoId)
+    showToast && showToast('Evento eliminado')
   }
 
   const tareas = (data.alumnos || []).flatMap(a =>
@@ -153,12 +170,14 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
         </div>
         {tareasOpen ? (
           <div className="section-hero-body">
+            <button className="btn-secondary" style={{ marginBottom: 10 }} onClick={() => setNuevaTareaOpen(true)}>+ Nueva tarea</button>
             <ListaRegistros
               items={tareas}
               abiertaId={tareaAbiertaId}
               setAbiertaId={setTareaAbiertaId}
-              onCompletar={completarTarea}
-              etiquetaBoton="✓ Realizada"
+              onMarcar={marcarTareaLocal}
+              onEliminar={eliminarTareaLocal}
+              etiquetaHecho="✓ Realizada"
             />
           </div>
         ) : null}
@@ -175,12 +194,14 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
         </div>
         {eventosOpen ? (
           <div className="section-hero-body">
+            <button className="btn-secondary" style={{ marginBottom: 10 }} onClick={() => setNuevoEventoOpen(true)}>+ Nuevo evento</button>
             <ListaRegistros
               items={eventos}
               abiertaId={eventoAbiertoId}
               setAbiertaId={setEventoAbiertoId}
-              onCompletar={completarEvento}
-              etiquetaBoton="✓ Realizado"
+              onMarcar={marcarEventoLocal}
+              onEliminar={eliminarEventoLocal}
+              etiquetaHecho="✓ Realizado"
             />
           </div>
         ) : null}
@@ -191,6 +212,23 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
         : t && !lista.length
           ? <p className="empty">Sin resultados.</p>
           : null}
+
+      <NuevoRegistroModal
+        open={nuevaTareaOpen}
+        tipo="tarea"
+        alumnos={alumnos}
+        onGuardar={onGuardarTarea}
+        onClose={() => setNuevaTareaOpen(false)}
+        showToast={showToast}
+      />
+      <NuevoRegistroModal
+        open={nuevoEventoOpen}
+        tipo="evento"
+        alumnos={alumnos}
+        onGuardar={onGuardarEvento}
+        onClose={() => setNuevoEventoOpen(false)}
+        showToast={showToast}
+      />
     </div>
   )
 }

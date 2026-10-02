@@ -140,8 +140,12 @@ export default function App() {
             data={data}
             onNuevoAlumno={abrirNuevoAlumno}
             onVerDetalle={setDetalleId}
-            onCompletarTarea={store.eliminarTarea}
-            onCompletarEvento={store.eliminarEvento}
+            onGuardarTarea={store.guardarTarea}
+            onMarcarTarea={store.marcarTarea}
+            onEliminarTarea={store.eliminarTarea}
+            onGuardarEvento={store.guardarEvento}
+            onMarcarEvento={store.marcarEvento}
+            onEliminarEvento={store.eliminarEvento}
             showToast={showToast}
           />
         )
