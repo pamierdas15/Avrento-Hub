@@ -17,6 +17,7 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
   const pendiente = data.pagos.filter(p => p.alumnoId === alumnoId && p.tipo === 'pendiente').reduce((s, p) => s + p.importe, 0)
   const eb = estadoCfg(a.estado || 'activo')
   const tareas = ((data.tareas && data.tareas[alumnoId]) || []).slice().sort((x, y) => y.fecha.localeCompare(x.fecha))
+  const eventos = ((data.eventos && data.eventos[alumnoId]) || []).slice().sort((x, y) => x.fecha.localeCompare(y.fecha))
   const pack = getClasesPackInfo(data, a)
 
   return (
@@ -67,6 +68,23 @@ export default function DetalleModal({ open, alumnoId, data, onClose, onEditar }
                 </span>
               </div>
               {t.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>{t.evento}</div> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {eventos.length ? (
+        <div style={{ marginBottom: 14 }}>
+          <div className="sec-label">Eventos próximos</div>
+          {eventos.map(ev => (
+            <div key={ev.id} className="tarea-perfil-item">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{ev.tarea}</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+                  {new Date(ev.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+              {ev.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 3 }}>{ev.evento}</div> : null}
             </div>
           ))}
         </div>

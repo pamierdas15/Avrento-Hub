@@ -3,10 +3,10 @@ import { SK, FES_SK } from '../utils/constants'
 import { todayStr } from '../utils/helpers'
 
 function loadData() {
-  const base = { alumnos: [], sesiones: [], pagos: [], tareas: {} }
+  const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {} }
   try {
     const parsed = JSON.parse(localStorage.getItem(SK))
-    return parsed ? { ...base, ...parsed, tareas: parsed.tareas || {} } : base
+    return parsed ? { ...base, ...parsed, tareas: parsed.tareas || {}, eventos: parsed.eventos || {} } : base
   } catch {
     return base
   }
@@ -47,11 +47,14 @@ export function useAppData() {
     setData(d => {
       const tareas = { ...(d.tareas || {}) }
       delete tareas[id]
+      const eventos = { ...(d.eventos || {}) }
+      delete eventos[id]
       return {
         alumnos: d.alumnos.filter(a => a.id !== id),
         sesiones: d.sesiones.filter(s => s.alumnoId !== id),
         pagos: d.pagos.filter(p => p.alumnoId !== id),
-        tareas
+        tareas,
+        eventos
       }
     })
   }, [])
@@ -95,7 +98,7 @@ export function useAppData() {
 
   // ---- Backup ----
   const restaurarBackup = useCallback((nuevaData) => {
-    setData({ tareas: {}, ...nuevaData })
+    setData({ tareas: {}, eventos: {}, ...nuevaData })
   }, [])
 
   // ---- Tareas pendientes (por alumno) ----
@@ -115,6 +118,24 @@ export function useAppData() {
     })
   }, [])
 
+  // ---- Eventos próximos (por alumno) ----
+  // Misma mecánica que las tareas pendientes: cada alumno acumula una lista
+  // de eventos { id, tarea, evento, fecha } (mismos campos: título, descripción y fecha).
+  const guardarEvento = useCallback((alumnoId, { tarea, evento, fecha }) => {
+    setData(d => {
+      const actuales = (d.eventos && d.eventos[alumnoId]) || []
+      const nuevo = { id: Date.now().toString(), tarea, evento, fecha: fecha || todayStr() }
+      return { ...d, eventos: { ...(d.eventos || {}), [alumnoId]: [...actuales, nuevo] } }
+    })
+  }, [])
+
+  const eliminarEvento = useCallback((alumnoId, eventoId) => {
+    setData(d => {
+      const actuales = (d.eventos && d.eventos[alumnoId]) || []
+      return { ...d, eventos: { ...(d.eventos || {}), [alumnoId]: actuales.filter(e => e.id !== eventoId) } }
+    })
+  }, [])
+
   return {
     data,
     festivos,
@@ -129,6 +150,8 @@ export function useAppData() {
     eliminarFestivo,
     restaurarBackup,
     guardarTarea,
-    eliminarTarea
+    eliminarTarea,
+    guardarEvento,
+    eliminarEvento
   }
 }

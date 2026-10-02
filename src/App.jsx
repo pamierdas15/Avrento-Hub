@@ -121,6 +121,7 @@ export default function App() {
             esFestivo={esFestivo}
             registrarSesion={store.registrarSesion}
             guardarTarea={store.guardarTarea}
+            guardarEvento={store.guardarEvento}
             showToast={showToast}
             onGoTab={setTab}
             onIrAPago={irAPago}
@@ -135,6 +136,7 @@ export default function App() {
             onNuevoAlumno={abrirNuevoAlumno}
             onVerDetalle={setDetalleId}
             onCompletarTarea={store.eliminarTarea}
+            onCompletarEvento={store.eliminarEvento}
             showToast={showToast}
           />
         )

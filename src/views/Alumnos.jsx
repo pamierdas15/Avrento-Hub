@@ -34,12 +34,40 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
   )
 }
 
-export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletarTarea, showToast }) {
+function ListaRegistros({ items, abiertaId, setAbiertaId, onCompletar, etiquetaBoton }) {
+  if (!items.length) return <p className="empty">Sin registros.</p>
+  return items.map(it => {
+    const key = it.alumnoId + '-' + it.id
+    const abierta = abiertaId === key
+    return (
+      <div key={key} className="tarea-perfil-item tarea-perfil-row">
+        <div className="mini-hero-click" style={{ cursor: 'pointer' }} onClick={() => setAbiertaId(abierta ? null : key)}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{it.tarea}</span>
+            <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+              {new Date(it.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
+          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{it.alumnoNombre}</div>
+          {abierta && it.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{it.evento}</div> : null}
+        </div>
+        <button
+          className="tarea-realizada-btn"
+          onClick={e => { e.stopPropagation(); onCompletar(it.alumnoId, it.id) }}
+        >{etiquetaBoton}</button>
+      </div>
+    )
+  })
+}
+
+export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletarTarea, onCompletarEvento, showToast }) {
   const [termino, setTermino] = useState('')
   const [activosOpen, setActivosOpen] = useState(false)
   const [inactivosOpen, setInactivosOpen] = useState(false)
   const [tareasOpen, setTareasOpen] = useState(false)
+  const [eventosOpen, setEventosOpen] = useState(false)
   const [tareaAbiertaId, setTareaAbiertaId] = useState(null)
+  const [eventoAbiertoId, setEventoAbiertoId] = useState(null)
   const { alumnos } = data
   const t = termino.toLowerCase().trim()
   const lista = alumnos.filter(a =>
@@ -57,9 +85,18 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
     showToast && showToast('Tarea completada')
   }
 
+  function completarEvento(alumnoId, eventoId) {
+    onCompletarEvento && onCompletarEvento(alumnoId, eventoId)
+    showToast && showToast('Evento completado')
+  }
+
   const tareas = (data.alumnos || []).flatMap(a =>
     ((data.tareas && data.tareas[a.id]) || []).map(tt => ({ ...tt, alumnoId: a.id, alumnoNombre: a.nombre }))
   ).sort((x, y) => y.fecha.localeCompare(x.fecha))
+
+  const eventos = (data.alumnos || []).flatMap(a =>
+    ((data.eventos && data.eventos[a.id]) || []).map(ev => ({ ...ev, alumnoId: a.id, alumnoNombre: a.nombre }))
+  ).sort((x, y) => x.fecha.localeCompare(y.fecha))
 
   return (
     <div className="section-pad">
@@ -88,45 +125,6 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
       </div>
 
       <div className="section-hero">
-        <div className="section-hero-header" onClick={() => setTareasOpen(o => !o)}>
-          <div className="section-hero-left">
-            <div className="section-hero-icon purple">📝</div>
-            <div className="section-hero-title">Tareas</div>
-            <span className="section-hero-count">{tareas.length}</span>
-          </div>
-          <div className="section-hero-toggle" style={{ transform: tareasOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
-        </div>
-        {tareasOpen ? (
-          <div className="section-hero-body">
-            {!tareas.length
-              ? <p className="empty">Sin tareas registradas.</p>
-              : tareas.map(tt => {
-                const key = tt.alumnoId + '-' + tt.id
-                const abierta = tareaAbiertaId === key
-                return (
-                  <div key={key} className="tarea-perfil-item tarea-perfil-row">
-                    <div className="mini-hero-click" style={{ cursor: 'pointer' }} onClick={() => setTareaAbiertaId(abierta ? null : key)}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{tt.tarea}</span>
-                        <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
-                          {new Date(tt.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{tt.alumnoNombre}</div>
-                      {abierta && tt.evento ? <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>{tt.evento}</div> : null}
-                    </div>
-                    <button
-                      className="tarea-realizada-btn"
-                      onClick={e => { e.stopPropagation(); completarTarea(tt.alumnoId, tt.id) }}
-                    >✓ Realizada</button>
-                  </div>
-                )
-              })}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="section-hero">
         <div className="section-hero-header" onClick={() => setInactivosOpen(o => !o)}>
           <div className="section-hero-left">
             <div className="section-hero-icon red">✗</div>
@@ -140,6 +138,50 @@ export default function Alumnos({ data, onNuevoAlumno, onVerDetalle, onCompletar
             {!inactivos.length
               ? <p className="empty">Sin alumnos inactivos.</p>
               : inactivos.map(a => <AlumnoCard key={a.id} a={a} idx={alumnos.indexOf(a)} data={data} onVerDetalle={onVerDetalle} />)}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="section-hero">
+        <div className="section-hero-header" onClick={() => setTareasOpen(o => !o)}>
+          <div className="section-hero-left">
+            <div className="section-hero-icon purple">📝</div>
+            <div className="section-hero-title">Tareas</div>
+            <span className="section-hero-count">{tareas.length}</span>
+          </div>
+          <div className="section-hero-toggle" style={{ transform: tareasOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+        </div>
+        {tareasOpen ? (
+          <div className="section-hero-body">
+            <ListaRegistros
+              items={tareas}
+              abiertaId={tareaAbiertaId}
+              setAbiertaId={setTareaAbiertaId}
+              onCompletar={completarTarea}
+              etiquetaBoton="✓ Realizada"
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="section-hero">
+        <div className="section-hero-header" onClick={() => setEventosOpen(o => !o)}>
+          <div className="section-hero-left">
+            <div className="section-hero-icon blue">📅</div>
+            <div className="section-hero-title">Eventos Próximos</div>
+            <span className="section-hero-count">{eventos.length}</span>
+          </div>
+          <div className="section-hero-toggle" style={{ transform: eventosOpen ? 'rotate(180deg)' : 'none' }}>▾</div>
+        </div>
+        {eventosOpen ? (
+          <div className="section-hero-body">
+            <ListaRegistros
+              items={eventos}
+              abiertaId={eventoAbiertoId}
+              setAbiertaId={setEventoAbiertoId}
+              onCompletar={completarEvento}
+              etiquetaBoton="✓ Realizado"
+            />
           </div>
         ) : null}
       </div>

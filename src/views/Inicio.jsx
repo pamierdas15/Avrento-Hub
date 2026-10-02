@@ -3,8 +3,9 @@ import { DIAS_ES, MESES, TURNOS, FEST_CFG } from '../utils/constants'
 import { todayStr, initials, alumnoColor, getWeekDates } from '../utils/helpers'
 import { getAlertas } from '../utils/business'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
+import EventoProximoHero from '../components/EventoProximoHero.jsx'
 
-export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, showToast, onGoTab, onIrAPago, onNuevoAlumno, onVerAlertas }) {
+export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, guardarEvento, showToast, onGoTab, onIrAPago, onNuevoAlumno, onVerAlertas }) {
   const hoy = new Date()
   const hoyISO = todayStr()
   const dsHoy = hoy.getDay()
@@ -172,6 +173,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
                 </div>
 
                 <TareaPendienteHero alumnoId={a.id} onGuardar={guardarTarea} showToast={showToast} />
+                <EventoProximoHero alumnoId={a.id} onGuardar={guardarEvento} showToast={showToast} />
               </div>
             ) : null}
           </div>
