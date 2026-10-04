@@ -2,13 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SK, FES_SK } from '../utils/constants'
 import { todayStr } from '../utils/helpers'
 import { restaurarPlantillas } from '../utils/backup'
-import { migrarPagos, describirCobertura } from '../utils/business'
+import { migrarDatos, describirCobertura } from '../utils/business'
 
 function loadData() {
   const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {} }
   try {
     const parsed = JSON.parse(localStorage.getItem(SK))
-    return parsed ? migrarPagos({ ...base, ...parsed, tareas: parsed.tareas || {}, eventos: parsed.eventos || {} }) : base
+    return parsed ? migrarDatos({ ...base, ...parsed, tareas: parsed.tareas || {}, eventos: parsed.eventos || {} }) : base
   } catch {
     return base
   }
@@ -170,7 +170,7 @@ export function useAppData() {
   // ---- Backup ----
   // "extra" (backups version 2+) trae también festivos y plantillas de WhatsApp.
   const restaurarBackup = useCallback((nuevaData, extra) => {
-    cambiar(() => migrarPagos({ alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, ...nuevaData }))
+    cambiar(() => migrarDatos({ alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, ...nuevaData }))
     if (extra) {
       if (Array.isArray(extra.festivos)) setFestivos(extra.festivos)
       restaurarPlantillas(extra)

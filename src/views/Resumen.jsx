@@ -1,5 +1,5 @@
-import { DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
-import { fmt, alumnoColor, initials, todayStr } from '../utils/helpers'
+import { DIAS_FULL, MODALIDAD_CFG } from '../utils/constants'
+import { fmt, alumnoColor, initials, todayStr, etiquetaTurno } from '../utils/helpers'
 import { getResumenPendiente } from '../utils/business'
 
 // Clave de mes ("YYYY-MM") a la que se acumula un pago: si el pago es de un
@@ -42,7 +42,7 @@ export default function Resumen({ data, onAbrirBackup, showToast }) {
       return {
         'Nombre': a.nombre, 'Curso': a.curso || '', 'Materia': a.materia || '', 'Estado': a.estado || 'activo',
         'Fecha alta': a.alta || '', 'Días': (a.dias || []).map(x => DIAS_FULL[parseInt(x)]).join(', '),
-        'Turno': TURNOS[a.hora] || a.hora || '', 'Modalidad': modCfg.selectLabel,
+        'Turno': etiquetaTurno(a), 'Modalidad': modCfg.selectLabel,
         'Tarifa (€)': a[modCfg.campo]
       }
     }))

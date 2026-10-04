@@ -1,5 +1,5 @@
 import Modal from '../Modal.jsx'
-import { initials, alumnoColor } from '../../utils/helpers'
+import { initials, alumnoColor, etiquetaTurno } from '../../utils/helpers'
 
 export default function EventoModal({ open, alumnoId, fecha, data, onClose, onRegistrar }) {
   if (!open || !alumnoId) return <Modal open={open}><button className="btn-secondary" onClick={onClose}>Cerrar</button></Modal>
@@ -22,7 +22,7 @@ export default function EventoModal({ open, alumnoId, fecha, data, onClose, onRe
       </div>
       <div className="rcard mb-10">
         <div className="rl">Fecha</div>
-        <div className="txt-titulo txt-cap">{fechaFmt}{a.hora ? ' · ' + a.hora : ''}</div>
+        <div className="txt-titulo txt-cap">{fechaFmt}{a.hora ? ' · ' + etiquetaTurno(a) : ''}</div>
       </div>
       <div className="rcard mb-14">
         <div className="rl">Asistencia</div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Modal from '../Modal.jsx'
-import { FTIPO_BTN_CFG, TURNOS } from '../../utils/constants'
-import { todayStr, initials, alumnoColor } from '../../utils/helpers'
+import { FTIPO_BTN_CFG } from '../../utils/constants'
+import { todayStr, initials, alumnoColor, etiquetaTurno } from '../../utils/helpers'
 
 const TIPOS = [
   { v: 'festivo', label: '🎉 Festivo' },
@@ -66,7 +66,7 @@ export default function FestivoModal({ open, data, onClose, onGuardar, showToast
             <div key={a.id} className="afectado-row ambar">
               <div className="avatar avatar-28" style={{ background: alumnoColor(data.alumnos.indexOf(a)) }}>{initials(a.nombre)}</div>
               <span className="afectado-nombre">{a.nombre}</span>
-              <span className="afectado-turno">{TURNOS[a.hora] || a.hora || ''}</span>
+              <span className="afectado-turno">{etiquetaTurno(a)}</span>
             </div>
           ))}
         </div>

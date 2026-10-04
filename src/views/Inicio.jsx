@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
-import { DIAS_ES, MESES, TURNOS, FEST_CFG } from '../utils/constants'
-import { todayStr, isoLocal, initials, alumnoColor, getWeekDates } from '../utils/helpers'
+import { DIAS_ES, MESES, FEST_CFG } from '../utils/constants'
+import { todayStr, isoLocal, initials, alumnoColor, getWeekDates, etiquetaTurno, claseTurno } from '../utils/helpers'
 import { getAlertas, getTareasPendientes } from '../utils/business'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
 import EventoProximoHero from '../components/EventoProximoHero.jsx'
@@ -124,7 +124,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
       ) : clasesDia.length ? clasesDia.map(a => {
         const idx = data.alumnos.indexOf(a)
         const sesH = data.sesiones.find(s => s.alumnoId === a.id && s.fecha === selISO)
-        const turno = a.hora === '17:00' ? 't1' : a.hora === '18:30' ? 't2' : 'sin'
+        const turno = claseTurno(a)
         const expanded = expandedId === a.id
         return (
           <div className={'card turno-' + turno} key={a.id}>
@@ -133,7 +133,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
               <div className="flex-1">
                 <div className="txt-titulo">{a.nombre}</div>
                 <div className="clase-meta">
-                  {a.curso || ''}{a.hora ? <> · <span className={'turno-' + turno + '-txt'}>{TURNOS[a.hora] || a.hora}</span></> : null}
+                  {a.curso || ''}{a.hora ? <> · <span className={'turno-' + turno + '-txt'}>{etiquetaTurno(a)}</span></> : null}
                 </div>
               </div>
               {sesH ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span> : null}

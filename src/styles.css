@@ -275,9 +275,11 @@ textarea{height:70px;resize:none}
 /* ---- Inicio: tarjeta de clase del día ---- */
 .card.turno-t1{border-left:3px solid rgba(77,159,255,0.5)}
 .card.turno-t2{border-left:3px solid rgba(251,146,60,0.5)}
+.card.turno-tx{border-left:3px solid rgba(167,139,250,0.5)}
 .card.turno-sin{border-left:3px solid rgba(255,255,255,0.15)}
 .turno-t1-txt{color:#4d9fff}
 .turno-t2-txt{color:#fb923c}
+.turno-tx-txt{color:#a78bfa}
 .turno-sin-txt{color:rgba(255,255,255,0.7)}
 .clase-head{display:flex;align-items:center;gap:10px;cursor:pointer}
 .clase-meta{font-size:11px;color:rgba(255,255,255,0.55)}
@@ -393,6 +395,8 @@ textarea.plantilla-txt{height:100px;font-size:13px}
 select.select-extra{border-color:rgba(251,191,36,0.4)}
 .aviso-extra{font-size:11px;color:#fbbf24;margin-top:4px}
 .fila-mes{display:flex;gap:8px}
+.fila-horas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+input[type="time"]{color-scheme:dark}
 .fila-mes select:first-child{flex:2}
 .fila-mes select:last-child{flex:1}
 .badge.badge-mr{margin-right:6px}
@@ -418,6 +422,7 @@ select.select-extra{border-color:rgba(251,191,36,0.4)}
 .turno-vacio.t2{background:rgba(251,146,60,0.12)}
 .turno-vacio.t2 span{color:#fb923c55}
 .cal-hero-event.t1{background:rgba(77,159,255,0.12);border-left:2px solid #4d9fff;margin-bottom:3px;color:#4d9fff}
+.cal-hero-event.tx{background:rgba(167,139,250,0.12);border-left:2px solid #a78bfa;margin-bottom:3px;color:#a78bfa}
 .cal-hero-event.t2{background:rgba(251,146,60,0.12);border-left:2px solid #fb923c;margin-bottom:3px;color:#fb923c}
 
 /* ---- Festivos (bloquear día) ---- */

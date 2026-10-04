@@ -1,11 +1,25 @@
 import { useState } from 'react'
 import { DIAS_ES, MESES, FEST_CFG } from '../utils/constants'
-import { getWeekDates, todayStr, isoLocal } from '../utils/helpers'
+import { getWeekDates, todayStr, isoLocal, esTurnoPersonalizado } from '../utils/helpers'
 
 // Calendario semanal en formato "hero": siempre visible dentro de Asistencia,
 // muestra los alumnos asignados a cada día de la semana (igual que la antigua
 // pestaña Calendario), pero de solo lectura — no abre modales ni depende del
 // formulario de registro de asistencia que tiene encima.
+// Filas de un día: los dos turnos fijos (siempre, aunque estén vacíos) y, si
+// hay alumnos con horario personalizado ese día, una fila por cada hora de
+// inicio. Todo ordenado por hora.
+function filasDelDia(alumnosDia) {
+  const filas = [
+    { key: '11:00', hora: '11:00', t: 't2', alumnos: alumnosDia.filter(a => a.hora === '11:00' && !esTurnoPersonalizado(a)) },
+    { key: '17:00', hora: '17:00', t: 't1', alumnos: alumnosDia.filter(a => a.hora === '17:00' && !esTurnoPersonalizado(a)) }
+  ]
+  const personalizados = alumnosDia.filter(a => esTurnoPersonalizado(a) || (a.hora && a.hora !== '11:00' && a.hora !== '17:00'))
+  const horas = [...new Set(personalizados.map(a => a.hora))]
+  horas.forEach(h => filas.push({ key: 'p-' + h, hora: h, t: 'tx', alumnos: personalizados.filter(a => a.hora === h) }))
+  return filas.sort((x, y) => x.hora.localeCompare(y.hora))
+}
+
 export default function CalendarioHero({ data, esFestivo }) {
   const [offset, setOffset] = useState(0)
   const dates = getWeekDates(offset)
@@ -67,16 +81,14 @@ export default function CalendarioHero({ data, esFestivo }) {
             }
             return (
               <div key={i} className={'cal-hero-slot' + (isT ? ' is-hoy' : '')}>
-                {['17:00', '18:30'].map(turno => {
-                  const t = turno === '17:00' ? 't1' : 't2'
-                  const arr = eventos.filter(a => a.hora === turno)
-                  if (!arr.length) {
-                    return <div key={turno} className={'turno-vacio ' + t}><span>{turno}</span></div>
+                {filasDelDia(eventos).map(fila => {
+                  if (!fila.alumnos.length) {
+                    return <div key={fila.key} className={'turno-vacio ' + fila.t}><span>{fila.hora}</span></div>
                   }
-                  return arr.map(a => (
-                    <div className={'cal-hero-event ' + t} key={a.id + turno}>
+                  return fila.alumnos.map(a => (
+                    <div className={'cal-hero-event ' + fila.t} key={a.id + fila.key}>
                       <div className="ev-name">{a.nombre.split(' ')[0]}</div>
-                      <div className="ev-hora">{turno}</div>
+                      <div className="ev-hora">{a.hora}</div>
                     </div>
                   ))
                 })}

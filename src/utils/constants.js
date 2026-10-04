@@ -9,7 +9,9 @@ export const DIAS_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 export const DIAS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 export const COLORS = ['#2563eb', '#1d9e75', '#7c3aed', '#db2777', '#d97706', '#0891b2', '#059669', '#dc2626']
-export const TURNOS = { '17:00': 'T1 · 17–18:30', '18:30': 'T2 · 18:30–20h' }
+// Turnos fijos (clave = hora de inicio). Cualquier otro horario se configura
+// como "Horario personalizado" en la ficha del alumno.
+export const TURNOS = { '11:00': 'Mañana · 11–12:30', '17:00': 'Tarde · 17–18:30' }
 
 // Los colores de cada estado están en styles.css (.estado-activo / .estado-inactivo
 // y .estado-btn.on-activo / .on-inactivo).

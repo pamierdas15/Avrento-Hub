@@ -12,7 +12,7 @@ const CLASES_SEMANALES_OPCIONES = [1, 2, 3, 4, 5, 6]
 
 const BLANK = {
   id: '', nombre: '', curso: '1º ESO', materia: '', estado: 'activo', alta: todayStr(),
-  dias: [], hora: '', modalidad: 'fija', tarifa: '', precioPack: '', precioSesion: '',
+  dias: [], hora: '', horaFin: '', modalidad: 'fija', tarifa: '', precioPack: '', precioSesion: '',
   clasesSemanales: 0, notas: ''
 }
 
@@ -38,6 +38,8 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
   function guardar() {
     if (!form.nombre.trim()) { showToast('Introduce el nombre'); return }
+    if (personalizado && (!form.hora || !form.horaFin)) { showToast('Indica la hora de inicio y de fin del turno'); return }
+    if (personalizado && form.horaFin <= form.hora) { showToast('La hora de fin debe ser posterior a la de inicio'); return }
     // Al reactivar un alumno inactivo, su fecha de alta se actualiza a hoy:
     // los pagos pendientes se cuentan siempre desde la fecha de alta.
     const reactivando = form.estado === 'activo' && editing && editing.estado !== 'activo'
@@ -51,6 +53,7 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
       alta,
       dias: form.dias,
       hora: form.hora,
+      horaFin: personalizado ? form.horaFin : '',
       modalidad: form.modalidad,
       tarifa: parseFloat(form.tarifa) || 0,
       precioPack: parseFloat(form.precioPack) || 0,
@@ -61,6 +64,16 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
   }
 
   const modCfg = MODALIDAD_CFG[form.modalidad]
+
+  // Turno: los dos fijos o un horario personalizado (inicio y fin a elegir)
+  const personalizado = !!form.horaFin
+  function cambiarTurno(v) {
+    if (v === 'personalizado') {
+      setForm(f => ({ ...f, hora: f.hora && f.hora !== '' ? f.hora : '16:00', horaFin: f.horaFin || '17:30' }))
+    } else {
+      setForm(f => ({ ...f, hora: v, horaFin: '' }))
+    }
+  }
 
   return (
     <Modal open={open}>
@@ -123,11 +136,24 @@ export default function AlumnoModal({ open, editing, onClose, onSave, onDelete, 
 
       <div className="inp-row">
         <label className="inp-label">Turno</label>
-        <select value={form.hora} onChange={e => set('hora', e.target.value)}>
+        <select value={personalizado ? 'personalizado' : form.hora} onChange={e => cambiarTurno(e.target.value)}>
           <option value="">Sin turno asignado</option>
-          <option value="17:00">🕔 Turno 1 — 17:00 a 18:30</option>
-          <option value="18:30">🕡 Turno 2 — 18:30 a 20:00</option>
+          <option value="11:00">☀️ Turno mañana — 11:00 a 12:30</option>
+          <option value="17:00">🕔 Turno tarde — 17:00 a 18:30</option>
+          <option value="personalizado">✏️ Horario personalizado</option>
         </select>
+        {personalizado ? (
+          <div className="fila-horas">
+            <div>
+              <label className="inp-label">Desde</label>
+              <input type="time" value={form.hora} onChange={e => set('hora', e.target.value)} />
+            </div>
+            <div>
+              <label className="inp-label">Hasta</label>
+              <input type="time" value={form.horaFin} onChange={e => set('horaFin', e.target.value)} />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="inp-row">

@@ -1,6 +1,6 @@
 import Modal from '../Modal.jsx'
-import { FEST_CFG, TURNOS } from '../../utils/constants'
-import { initials, alumnoColor } from '../../utils/helpers'
+import { FEST_CFG } from '../../utils/constants'
+import { initials, alumnoColor, etiquetaTurno } from '../../utils/helpers'
 
 export default function VerFestivoModal({ open, fecha, festivo, data, onClose, onEliminar }) {
   if (!open || !festivo) return <Modal open={open}><button className="btn-secondary" onClick={onClose}>Cerrar</button></Modal>
@@ -27,7 +27,7 @@ export default function VerFestivoModal({ open, fecha, festivo, data, onClose, o
             <div key={a.id} className="afectado-row">
               <div className="avatar avatar-28" style={{ background: alumnoColor(data.alumnos.indexOf(a)) }}>{initials(a.nombre)}</div>
               <span className="afectado-nombre">{a.nombre}</span>
-              <span className="afectado-turno">{TURNOS[a.hora] || a.hora || ''}</span>
+              <span className="afectado-turno">{etiquetaTurno(a)}</span>
             </div>
           ))}
         </>

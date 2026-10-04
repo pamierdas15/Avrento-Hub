@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { estadoCfg, DIAS_FULL, TURNOS, MODALIDAD_CFG } from '../utils/constants'
-import { initials, alumnoColor, fmt } from '../utils/helpers'
+import { estadoCfg, DIAS_FULL, MODALIDAD_CFG } from '../utils/constants'
+import { initials, alumnoColor, fmt, etiquetaTurno } from '../utils/helpers'
 import { getClasesPackInfo } from '../utils/business'
 import NuevoRegistroModal from '../components/modals/NuevoRegistroModal.jsx'
 
@@ -21,7 +21,7 @@ function AlumnoCard({ a, idx, data, onVerDetalle }) {
             <div className="alumno-meta">
               {a.curso || ''}{a.materia ? ' · ' + a.materia : ''}
               {(a.dias || []).length ? ' · ' + (a.dias || []).map(d => DIAS_FULL[parseInt(d)]).join(', ') : ''}
-              {a.hora ? ' · ' + (TURNOS[a.hora] || a.hora) : ''}
+              {a.hora ? ' · ' + etiquetaTurno(a) : ''}
             </div>
           </div>
         </div>

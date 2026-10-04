@@ -90,6 +90,22 @@ export function migrarPagos(d) {
   return cambio ? { ...d, pagos } : d
 }
 
+// El antiguo "Turno 2" (18:30 a 20:00) ya no es un turno fijo: los alumnos que
+// lo tenían pasan a horario personalizado 18:30–20:00, sin perder su horario.
+export function migrarAlumnos(d) {
+  let cambio = false
+  const alumnos = (d.alumnos || []).map(a => {
+    if (a.hora === '18:30' && !a.horaFin) { cambio = true; return { ...a, horaFin: '20:00' } }
+    return a
+  })
+  return cambio ? { ...d, alumnos } : d
+}
+
+// Todas las conversiones de datos antiguos (al abrir la app y al restaurar un backup).
+export function migrarDatos(d) {
+  return migrarPagos(migrarAlumnos(d))
+}
+
 // ---- Periodos pendientes por modalidad (fuente única de verdad) ----
 
 function pendientesMensuales(d, alumno) {
