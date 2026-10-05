@@ -2,7 +2,7 @@ import { useState } from 'react'
 import CalendarioHero from '../components/CalendarioHero.jsx'
 import { todayStr } from '../utils/helpers'
 
-export default function Asistencia({ data, esFestivo, registrarSesion, eliminarSesion, showToast, toastDeshacer }) {
+export default function Asistencia({ data, esFestivo, registrarSesion, eliminarSesion, showToast, toastDeshacer, onAbrirDia }) {
   const { alumnos } = data
   const [alumnoId, setAlumnoId] = useState(alumnos[0]?.id || '')
   const [fecha, setFecha] = useState(todayStr())
@@ -20,7 +20,7 @@ export default function Asistencia({ data, esFestivo, registrarSesion, eliminarS
   return (
     <div className="section-pad">
       <div className="sec-label">Calendario</div>
-      <CalendarioHero data={data} esFestivo={esFestivo} />
+      <CalendarioHero data={data} esFestivo={esFestivo} onAbrirDia={onAbrirDia} />
 
       <div className="section-hero mt-18">
         <div className="section-hero-header" onClick={() => setRegistrarOpen(o => !o)}>

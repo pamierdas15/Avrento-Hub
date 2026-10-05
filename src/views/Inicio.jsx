@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react'
 import { DIAS_ES, MESES, FEST_CFG } from '../utils/constants'
 import { todayStr, isoLocal, initials, alumnoColor, getWeekDates, etiquetaTurno, claseTurno } from '../utils/helpers'
-import { getAlertas, getTareasPendientes } from '../utils/business'
+import { getAlertas, getTareasPendientes, clasesDelDia, agruparPorTurno } from '../utils/business'
+import { CabeceraTurno, badgeClase } from '../components/modals/EventoModal.jsx'
 import TareaPendienteHero from '../components/TareaPendienteHero.jsx'
 import EventoProximoHero from '../components/EventoProximoHero.jsx'
 
-export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, guardarEvento, showToast, onIrAPago, onVerAlertas, onVerTareas }) {
+export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea, guardarEvento, showToast, onIrAPago, onVerAlertas, onVerTareas, onAbrirClase, cancelarClase, restaurarClase, toastDeshacer }) {
   const hoy = new Date()
   const hoyISO = todayStr()
   const dsHoy = hoy.getDay()
@@ -23,14 +24,14 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
   const sem = getWeekDates(weekOffset)
   const selDate = sem[selectedIdx]
   const selISO = isoLocal(selDate)
-  const selDow = selDate.getDay()
   const esSelHoy = selISO === hoyISO
   const nombreDiaSel = esSelHoy ? 'Hoy' : selDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
   const fesSel = esFestivo(selISO)
 
-  const clasesDia = data.alumnos
-    .filter(a => (a.dias || []).includes(String(selDow)))
-    .sort((a, b) => (a.hora || '').localeCompare(b.hora || ''))
+  // Clases del día elegido: horario fijo + cambios puntuales de esa fecha,
+  // agrupadas por turno con sus plazas ocupadas.
+  const clasesDia = clasesDelDia(data, selISO)
+  const gruposDia = agruparPorTurno(clasesDia, false)
 
   const m1 = sem[0], m7 = sem[6]
   const weekLabel = `${m1.getDate()} ${MESES[m1.getMonth()].substring(0, 3)} — ${m7.getDate()} ${MESES[m7.getMonth()].substring(0, 3)}`
@@ -98,7 +99,7 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
             const iso = isoLocal(dia)
             const esH = iso === hoyISO
             const esSel = i === selectedIdx
-            const tieneC = data.alumnos.some(a => (a.dias || []).includes(String(dia.getDay())))
+            const tieneC = clasesDelDia(data, iso).some(c => !c.cancelada)
             const fes = esFestivo(iso)
             return (
               <button key={i} onClick={() => setSelectedIdx(i)} className="semana-dia">
@@ -121,49 +122,74 @@ export default function Inicio({ data, esFestivo, registrarSesion, guardarTarea,
       <div className="sec-label">Clases · <span className="sec-label-dia">{nombreDiaSel}</span></div>
       {fesSel ? (
         <div className="empty">{FEST_CFG[fesSel.tipo].ico} {FEST_CFG[fesSel.tipo].label}{fesSel.nota ? ' · ' + fesSel.nota : ''}</div>
-      ) : clasesDia.length ? clasesDia.map(a => {
-        const idx = data.alumnos.indexOf(a)
-        const sesH = data.sesiones.find(s => s.alumnoId === a.id && s.fecha === selISO)
-        const turno = claseTurno(a)
-        const expanded = expandedId === a.id
-        return (
-          <div className={'card turno-' + turno} key={a.id}>
-            <div className="clase-head" onClick={() => setExpandedId(expanded ? null : a.id)}>
-              <div className="avatar avatar-36" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
-              <div className="flex-1">
-                <div className="txt-titulo">{a.nombre}</div>
-                <div className="clase-meta">
-                  {a.curso || ''}{a.hora ? <> · <span className={'turno-' + turno + '-txt'}>{etiquetaTurno(a)}</span></> : null}
-                </div>
-              </div>
-              {sesH ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span> : null}
-              <span className={'clase-chevron rot' + (expanded ? ' is-open' : '')}>▾</span>
+      ) : (
+        <>
+          {!clasesDia.length ? <div className="empty">No hay clases programadas ese día</div> : gruposDia.map(g => (
+            <div key={g.clave}>
+              <CabeceraTurno grupo={g} />
+              {g.clases.map(c => {
+                const a = c.alumno
+                const idx = data.alumnos.indexOf(a)
+                const sesH = data.sesiones.find(s => s.alumnoId === a.id && s.fecha === selISO)
+                const turno = claseTurno(c)
+                const expanded = expandedId === c.key
+                const b = badgeClase(c)
+                return (
+                  <div className={'card turno-' + turno + (c.cancelada ? ' is-cancelada' : '')} key={c.key}>
+                    <div className="clase-head" onClick={() => setExpandedId(expanded ? null : c.key)}>
+                      <div className="avatar avatar-36" style={{ background: alumnoColor(idx) }}>{initials(a.nombre)}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="txt-titulo">{a.nombre}</div>
+                        <div className="clase-meta">
+                          {a.curso || ''}{c.hora ? <> · <span className={'turno-' + turno + '-txt'}>{etiquetaTurno(c)}</span></> : null}
+                        </div>
+                        {b ? <span className={'badge badge-mini ml-0 ' + b.cls}>{b.txt}</span> : null}
+                      </div>
+                      {sesH ? <span className={'badge badge-' + sesH.estado}>{sesH.estado === 'presente' ? '✓ Pres.' : sesH.estado === 'ausente' ? '✗ Aus.' : '↩ Just.'}</span> : null}
+                      <span className={'clase-chevron rot' + (expanded ? ' is-open' : '')}>▾</span>
+                    </div>
+
+                    {expanded ? (
+                      <div className="clase-body">
+                        {c.cancelada ? (
+                          <div className="mini-btn-row">
+                            <button className="mini-btn mini-btn-restaurar" onClick={() => toastDeshacer('Clase restaurada', restaurarClase(c))}>↺ Restaurar clase</button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mini-btn-row">
+                              <button
+                                className={'mini-btn mini-btn-asistencia' + (sesH ? ' mini-btn-done' : '')}
+                                onClick={() => !sesH && regDesdeInicio(a.id)}
+                                disabled={!!sesH}
+                              >
+                                {sesH
+                                  ? (sesH.estado === 'presente' ? '✓ Presente' : sesH.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada')
+                                  : '✓ Confirmar asistencia'}
+                              </button>
+                              <button className="mini-btn mini-btn-pago" onClick={() => onIrAPago(a.id)}>
+                                💳 Pago
+                              </button>
+                            </div>
+                            <div className="mini-btn-row">
+                              <button className="mini-btn mini-btn-mover" onClick={() => onAbrirClase({ modo: 'mover', fecha: selISO, clase: c })}>⇄ Mover</button>
+                              <button className="mini-btn mini-btn-cancelar" onClick={() => toastDeshacer(c.puntual ? 'Clase quitada' : 'Clase cancelada', cancelarClase(c))}>{c.puntual ? '✕ Quitar' : '✕ Cancelar'}</button>
+                            </div>
+
+                            <TareaPendienteHero alumnoId={a.id} onGuardar={guardarTarea} showToast={showToast} />
+                            <EventoProximoHero alumnoId={a.id} onGuardar={guardarEvento} showToast={showToast} />
+                          </>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
             </div>
-
-            {expanded ? (
-              <div className="clase-body">
-                <div className="mini-btn-row">
-                  <button
-                    className={'mini-btn mini-btn-asistencia' + (sesH ? ' mini-btn-done' : '')}
-                    onClick={() => !sesH && regDesdeInicio(a.id)}
-                    disabled={!!sesH}
-                  >
-                    {sesH
-                      ? (sesH.estado === 'presente' ? '✓ Presente' : sesH.estado === 'ausente' ? '✗ Ausente' : '↩ Justificada')
-                      : '✓ Confirmar asistencia'}
-                  </button>
-                  <button className="mini-btn mini-btn-pago" onClick={() => onIrAPago(a.id)}>
-                    💳 Pago
-                  </button>
-                </div>
-
-                <TareaPendienteHero alumnoId={a.id} onGuardar={guardarTarea} showToast={showToast} />
-                <EventoProximoHero alumnoId={a.id} onGuardar={guardarEvento} showToast={showToast} />
-              </div>
-            ) : null}
-          </div>
-        )
-      }) : <div className="empty">No hay clases programadas ese día</div>}
+          ))}
+          <button className="btn-secondary btn-anadir-clase" onClick={() => onAbrirClase({ modo: 'anadir', fecha: selISO })}>+ Añadir clase puntual</button>
+        </>
+      )}
     </div>
   )
 }

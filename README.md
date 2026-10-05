@@ -60,6 +60,9 @@ volver a importar el proyecto ni configurar nada.
 - Cada pago cobrado guarda qué cubre (`cubre`: `mes`, `pack`, `sesion` o `extra`, y `unidades`),
   calculado con el precio vigente al cobrarlo. Así, cambiar la tarifa o la modalidad de un alumno
   no altera lo que ya estaba pagado. Los pagos antiguos se convierten solos al abrir la app.
+- Clases puntuales (`data.puntuales`): cambios que solo afectan a una fecha, encima del horario fijo
+  (añadir, mover o cancelar una clase). Una clase movida cuenta como recuperación y no genera clase
+  extra. Cada turno tiene 4 plazas (`PLAZAS_POR_TURNO` en `constants.js`).
 - Las fuentes (Work Sans, Bebas Neue, JetBrains Mono) van incluidas vía `@fontsource`: no
   dependen de Google Fonts y funcionan sin conexión.
 - La librería de Excel (`xlsx`) se descarga solo al pulsar "Exportar Excel", para que la app

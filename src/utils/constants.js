@@ -11,6 +11,9 @@ export const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'ju
 export const COLORS = ['#2563eb', '#1d9e75', '#7c3aed', '#db2777', '#d97706', '#0891b2', '#059669', '#dc2626']
 // Turnos fijos (clave = hora de inicio). Cualquier otro horario se configura
 // como "Horario personalizado" en la ficha del alumno.
+// Plazas disponibles en cada turno (para mostrar los huecos libres)
+export const PLAZAS_POR_TURNO = 4
+
 export const TURNOS = { '11:00': 'Mañana · 11–12:30', '17:00': 'Tarde · 17–18:30' }
 
 // Los colores de cada estado están en styles.css (.estado-activo / .estado-inactivo

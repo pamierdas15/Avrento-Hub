@@ -5,10 +5,10 @@ import { restaurarPlantillas } from '../utils/backup'
 import { migrarDatos, describirCobertura } from '../utils/business'
 
 function loadData() {
-  const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {} }
+  const base = { alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, puntuales: [] }
   try {
     const parsed = JSON.parse(localStorage.getItem(SK))
-    return parsed ? migrarDatos({ ...base, ...parsed, tareas: parsed.tareas || {}, eventos: parsed.eventos || {} }) : base
+    return parsed ? migrarDatos({ ...base, ...parsed, tareas: parsed.tareas || {}, eventos: parsed.eventos || {}, puntuales: parsed.puntuales || [] }) : base
   } catch {
     return base
   }
@@ -78,6 +78,7 @@ export function useAppData() {
     const pagos = d0.pagos.filter(p => p.alumnoId === id)
     const tareasA = (d0.tareas || {})[id]
     const eventosA = (d0.eventos || {})[id]
+    const puntualesA = (d0.puntuales || []).filter(p => p.alumnoId === id)
     cambiar(d => {
       const tareas = { ...(d.tareas || {}) }
       delete tareas[id]
@@ -88,6 +89,7 @@ export function useAppData() {
         alumnos: d.alumnos.filter(a => a.id !== id),
         sesiones: d.sesiones.filter(s => s.alumnoId !== id),
         pagos: d.pagos.filter(p => p.alumnoId !== id),
+        puntuales: (d.puntuales || []).filter(p => p.alumnoId !== id),
         tareas,
         eventos
       }
@@ -101,6 +103,7 @@ export function useAppData() {
         alumnos,
         sesiones: [...d.sesiones, ...sesiones],
         pagos: [...d.pagos, ...pagos],
+        puntuales: [...(d.puntuales || []), ...puntualesA],
         tareas: tareasA ? { ...(d.tareas || {}), [id]: tareasA } : d.tareas,
         eventos: eventosA ? { ...(d.eventos || {}), [id]: eventosA } : d.eventos
       }
@@ -154,6 +157,43 @@ export function useAppData() {
     return () => cambiar(d => ({ ...d, pagos: d.pagos.map(p => p.id === id ? original : p) }))
   }, [cambiar])
 
+  // ---- Clases puntuales (añadir / mover / cancelar una clase en una fecha) ----
+  // Cada acción devuelve una función que la deshace (botón "Deshacer").
+  const cambiarPuntuales = useCallback((fn) => {
+    const previas = dataRef.current.puntuales || []
+    cambiar(d => ({ ...d, puntuales: fn(d.puntuales || []) }))
+    return () => cambiar(d => ({ ...d, puntuales: previas }))
+  }, [cambiar])
+
+  const anadirClase = useCallback(({ alumnoId, fecha, hora, horaFin }) => cambiarPuntuales(arr => [
+    ...arr, { id: nuevoId(), tipo: 'anadir', alumnoId, fecha, hora: hora || '', horaFin: horaFin || '' }
+  ]), [cambiarPuntuales])
+
+  // "clase" es un elemento de clasesDelDia(). Una fija se cancela solo ese día;
+  // una añadida se quita.
+  const cancelarClase = useCallback((clase) => cambiarPuntuales(arr => clase.puntual
+    ? arr.filter(p => p.id !== clase.puntualId)
+    : [...arr, { id: nuevoId(), tipo: 'cancelar', alumnoId: clase.alumno.id, fecha: clase.fecha }]
+  ), [cambiarPuntuales])
+
+  // Vuelve a activar una clase fija cancelada; si se había movido, quita
+  // también la recuperación del otro día.
+  const restaurarClase = useCallback((clase) => cambiarPuntuales(arr =>
+    arr.filter(p => p.id !== clase.cancelId && p.origen !== clase.cancelId)
+  ), [cambiarPuntuales])
+
+  const moverClase = useCallback((clase, { fecha, hora, horaFin }) => cambiarPuntuales(arr => {
+    if (clase.puntual) {
+      return arr.map(p => p.id === clase.puntualId ? { ...p, fecha, hora: hora || '', horaFin: horaFin || '' } : p)
+    }
+    const cancelId = nuevoId()
+    return [
+      ...arr,
+      { id: cancelId, tipo: 'cancelar', alumnoId: clase.alumno.id, fecha: clase.fecha },
+      { id: nuevoId(), tipo: 'anadir', alumnoId: clase.alumno.id, fecha, hora: hora || '', horaFin: horaFin || '', recuperacion: true, origen: cancelId }
+    ]
+  }), [cambiarPuntuales])
+
   // ---- Festivos ----
   const guardarFestivo = useCallback((festivo) => {
     setFestivos(f => [...f.filter(x => x.fecha !== festivo.fecha), festivo])
@@ -170,7 +210,7 @@ export function useAppData() {
   // ---- Backup ----
   // "extra" (backups version 2+) trae también festivos y plantillas de WhatsApp.
   const restaurarBackup = useCallback((nuevaData, extra) => {
-    cambiar(() => migrarDatos({ alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, ...nuevaData }))
+    cambiar(() => migrarDatos({ alumnos: [], sesiones: [], pagos: [], tareas: {}, eventos: {}, puntuales: [], ...nuevaData }))
     if (extra) {
       if (Array.isArray(extra.festivos)) setFestivos(extra.festivos)
       restaurarPlantillas(extra)
@@ -232,6 +272,10 @@ export function useAppData() {
     registrarPago,
     eliminarPago,
     marcarPagoCobrado,
+    anadirClase,
+    cancelarClase,
+    restaurarClase,
+    moverClase,
     guardarFestivo,
     eliminarFestivo,
     restaurarBackup,

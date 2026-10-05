@@ -1,26 +1,15 @@
 import { useState } from 'react'
 import { DIAS_ES, MESES, FEST_CFG } from '../utils/constants'
-import { getWeekDates, todayStr, isoLocal, esTurnoPersonalizado } from '../utils/helpers'
+import { getWeekDates, todayStr, isoLocal } from '../utils/helpers'
+import { clasesDelDia, agruparPorTurno } from '../utils/business'
 
-// Calendario semanal en formato "hero": siempre visible dentro de Asistencia,
-// muestra los alumnos asignados a cada día de la semana (igual que la antigua
-// pestaña Calendario), pero de solo lectura — no abre modales ni depende del
-// formulario de registro de asistencia que tiene encima.
-// Filas de un día: los dos turnos fijos (siempre, aunque estén vacíos) y, si
-// hay alumnos con horario personalizado ese día, una fila por cada hora de
-// inicio. Todo ordenado por hora.
-function filasDelDia(alumnosDia) {
-  const filas = [
-    { key: '11:00', hora: '11:00', t: 't2', alumnos: alumnosDia.filter(a => a.hora === '11:00' && !esTurnoPersonalizado(a)) },
-    { key: '17:00', hora: '17:00', t: 't1', alumnos: alumnosDia.filter(a => a.hora === '17:00' && !esTurnoPersonalizado(a)) }
-  ]
-  const personalizados = alumnosDia.filter(a => esTurnoPersonalizado(a) || (a.hora && a.hora !== '11:00' && a.hora !== '17:00'))
-  const horas = [...new Set(personalizados.map(a => a.hora))]
-  horas.forEach(h => filas.push({ key: 'p-' + h, hora: h, t: 'tx', alumnos: personalizados.filter(a => a.hora === h) }))
-  return filas.sort((x, y) => x.hora.localeCompare(y.hora))
-}
+// Calendario semanal dentro de Asistencia. Muestra, para cada día, las clases
+// reales de esa fecha (horario fijo + clases puntuales, sin las canceladas)
+// agrupadas por turno, y las plazas libres de cada turno. Al tocar un día se
+// abre la ventana para gestionar sus clases (añadir, mover, cancelar).
+const color = clave => clave === '11:00' ? 't2' : clave === '17:00' ? 't1' : 'tx'
 
-export default function CalendarioHero({ data, esFestivo }) {
+export default function CalendarioHero({ data, esFestivo, onAbrirDia }) {
   const [offset, setOffset] = useState(0)
   const dates = getWeekDates(offset)
   const todayISO = todayStr()
@@ -28,14 +17,7 @@ export default function CalendarioHero({ data, esFestivo }) {
   const m1 = dates[0], m7 = dates[6]
   const label = `${m1.getDate()} ${MESES[m1.getMonth()].substring(0, 3)} — ${m7.getDate()} ${MESES[m7.getMonth()].substring(0, 3)} ${m7.getFullYear()}`
 
-  const dayMap = {}
-  dates.forEach(d => { dayMap[d.getDay()] = [] })
-  alumnos.forEach((a, idx) => {
-    ;(a.dias || (a.dia ? [a.dia] : [])).forEach(ds => {
-      const dn = parseInt(ds)
-      if (dayMap[dn] !== undefined) dayMap[dn].push({ ...a, colorIdx: idx })
-    })
-  })
+  const abrir = iso => { if (onAbrirDia) onAbrirDia(iso) }
 
   return (
     <div className="cal-hero">
@@ -50,7 +32,7 @@ export default function CalendarioHero({ data, esFestivo }) {
           const iso = isoLocal(d)
           const isT = iso === todayISO
           return (
-            <div className={'cal-hero-dia-hdr' + (isT ? ' today-col' : '')} key={i}>
+            <div className={'cal-hero-dia-hdr' + (isT ? ' today-col' : '')} key={i} onClick={() => abrir(iso)}>
               {isT ? <div className="cal-today-dot"></div> : null}
               <div>{DIAS_ES[d.getDay()]}</div>
               <div className="cal-hero-num">{d.getDate()}</div>
@@ -60,18 +42,17 @@ export default function CalendarioHero({ data, esFestivo }) {
       </div>
 
       {!alumnos.length ? (
-        <p className="cal-empty-msg">Añade alumnos con día y hora para ver el calendario.</p>
+        <p className="cal-empty-msg">Añade alumnos para ver el calendario.</p>
       ) : (
         <div className="cal-hero-grid">
           {dates.map((d, i) => {
-            const eventos = dayMap[d.getDay()] || []
             const iso = isoLocal(d)
             const isT = iso === todayISO
             const fes = esFestivo ? esFestivo(iso) : null
             if (fes) {
               const fc = FEST_CFG[fes.tipo]
               return (
-                <div key={i} className="cal-hero-slot fes-slot" style={{ background: fc.bg, border: '1px solid ' + fc.border }}>
+                <div key={i} className="cal-hero-slot fes-slot" style={{ background: fc.bg, border: '1px solid ' + fc.border }} onClick={() => abrir(iso)}>
                   <div className="fes-slot-inner">
                     <div className="fes-slot-ico">{fc.ico}</div>
                     <div className="fes-slot-txt" style={{ color: fc.color }}>{fes.tipo.substring(0, 3)}</div>
@@ -80,23 +61,38 @@ export default function CalendarioHero({ data, esFestivo }) {
               )
             }
             return (
-              <div key={i} className={'cal-hero-slot' + (isT ? ' is-hoy' : '')}>
-                {filasDelDia(eventos).map(fila => {
-                  if (!fila.alumnos.length) {
-                    return <div key={fila.key} className={'turno-vacio ' + fila.t}><span>{fila.hora}</span></div>
+              <div key={i} className={'cal-hero-slot' + (isT ? ' is-hoy' : '')} onClick={() => abrir(iso)}>
+                {agruparPorTurno(clasesDelDia(data, iso).filter(c => !c.cancelada && c.hora), true).map(g => {
+                  const t = color(g.clave)
+                  const libres = g.plazas - g.ocupadas
+                  if (!g.clases.length) {
+                    return (
+                      <div key={g.clave} className={'turno-vacio ' + t}>
+                        <span>{g.hora}</span>
+                        <span className="turno-libres">{g.plazas} libres</span>
+                      </div>
+                    )
                   }
-                  return fila.alumnos.map(a => (
-                    <div className={'cal-hero-event ' + fila.t} key={a.id + fila.key}>
-                      <div className="ev-name">{a.nombre.split(' ')[0]}</div>
-                      <div className="ev-hora">{a.hora}</div>
+                  return (
+                    <div key={g.clave}>
+                      {g.clases.map(c => (
+                        <div className={'cal-hero-event ' + t + (c.puntual ? ' puntual' : '')} key={c.key}>
+                          <div className="ev-name">{c.alumno.nombre.split(' ')[0]}</div>
+                          <div className="ev-hora">{c.hora}</div>
+                        </div>
+                      ))}
+                      <div className={'turno-cupo' + (libres <= 0 ? ' lleno' : '')}>
+                        {libres > 0 ? `${libres} libre${libres > 1 ? 's' : ''}` : libres === 0 ? 'Completo' : 'Sobrecupo'}
+                      </div>
                     </div>
-                  ))
+                  )
                 })}
               </div>
             )
           })}
         </div>
       )}
+      <div className="cal-hero-ayuda">Toca un día para añadir, mover o cancelar clases</div>
     </div>
   )
 }

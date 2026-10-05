@@ -1,5 +1,5 @@
 import { fmt, todayStr } from './helpers'
-import { MESES, CLASES_POR_PACK } from './constants'
+import { MESES, CLASES_POR_PACK, TURNOS, PLAZAS_POR_TURNO } from './constants'
 
 function inicioSemana(d) {
   const dd = new Date(d)
@@ -212,6 +212,9 @@ function clasesExtraAcumuladas(d, alumno) {
 // de la semana más antigua a la más reciente.
 function clasesExtraPorSemana(d, alumno) {
   if (!alumno.clasesSemanales || alumno.clasesSemanales <= 0) return []
+  const recuperaciones = new Set((d.puntuales || [])
+    .filter(p => p.tipo === 'anadir' && p.recuperacion)
+    .map(p => p.alumnoId + '|' + p.fecha))
   const hoy = new Date()
   const hoyLunes = inicioSemana(hoy)
   let cursor = inicioSemana(new Date(inicioConteo(alumno) + 'T12:00:00'))
@@ -223,6 +226,8 @@ function clasesExtraPorSemana(d, alumno) {
     const domingo = new Date(cursor); domingo.setDate(cursor.getDate() + 6); domingo.setHours(23, 59, 59, 999)
     const count = d.sesiones.filter(s => {
       if (s.alumnoId !== alumno.id || s.estado !== 'presente') return false
+      // Una clase movida a otro día es una recuperación: no cuenta como extra.
+      if (recuperaciones.has(s.alumnoId + '|' + s.fecha)) return false
       const f = new Date(s.fecha + 'T12:00:00')
       return f >= cursor && f <= domingo
     }).length
@@ -415,4 +420,71 @@ export function getTareasPendientes(d) {
       .filter(t => !t.completada)
       .map(t => ({ ...t, alumnoId: a.id, alumnoNombre: a.nombre }))
   ).sort((x, y) => (x.fecha || '').localeCompare(y.fecha || ''))
+}
+
+// ======================================================================
+// Clases puntuales: cambios que solo afectan a una fecha concreta, encima
+// del horario fijo semanal de cada alumno. Se guardan en data.puntuales:
+//   { id, tipo: 'anadir',   alumnoId, fecha, hora, horaFin, recuperacion?, origen? }
+//   { id, tipo: 'cancelar', alumnoId, fecha }
+// "Mover" una clase fija = un 'cancelar' en su día + un 'anadir' en el nuevo
+// día marcado como recuperación (origen = id del 'cancelar').
+// ======================================================================
+
+// Clases de un día: las fijas (por día de la semana, marcadas como canceladas
+// si procede) y las añadidas ese día. Ordenadas por hora.
+export function clasesDelDia(d, iso) {
+  const dow = String(new Date(iso + 'T12:00:00').getDay())
+  const pts = (d.puntuales || []).filter(p => p.fecha === iso)
+  const out = []
+  ;(d.alumnos || []).forEach(a => {
+    if (!(a.dias || []).includes(dow)) return
+    const cancel = pts.find(p => p.tipo === 'cancelar' && p.alumnoId === a.id)
+    const destino = cancel ? (d.puntuales || []).find(p => p.origen === cancel.id) : null
+    out.push({
+      key: 'f-' + a.id, fecha: iso, alumno: a, hora: a.hora || '', horaFin: a.horaFin || '',
+      fija: true, cancelada: !!cancel, cancelId: cancel ? cancel.id : null,
+      movidaA: destino ? destino.fecha : null
+    })
+  })
+  pts.filter(p => p.tipo === 'anadir').forEach(p => {
+    const a = (d.alumnos || []).find(x => x.id === p.alumnoId)
+    if (!a) return
+    out.push({
+      key: 'p-' + p.id, fecha: iso, alumno: a, hora: p.hora || '', horaFin: p.horaFin || '',
+      puntual: true, recuperacion: !!p.recuperacion, puntualId: p.id,
+      movidaDe: p.origen ? ((d.puntuales || []).find(x => x.id === p.origen) || {}).fecha || null : null
+    })
+  })
+  return out.sort((x, y) => (x.hora || '99').localeCompare(y.hora || '99') || x.alumno.nombre.localeCompare(y.alumno.nombre))
+}
+
+// Clave del turno de una clase: los fijos por su hora ('11:00', '17:00'); los
+// personalizados por su hora de inicio con prefijo 'p-'; sin hora → 'sin'.
+export function claveTurno(c) {
+  if (!c.hora) return 'sin'
+  if (!c.horaFin && TURNOS[c.hora]) return c.hora
+  return 'p-' + c.hora
+}
+
+// Nº de plazas ocupadas en un día y turno (clases no canceladas).
+export function plazasOcupadas(d, iso, clave, excluirKey) {
+  return clasesDelDia(d, iso).filter(c => !c.cancelada && c.key !== excluirKey && claveTurno(c) === clave).length
+}
+
+// Agrupa las clases de un día por turno, con las plazas ocupadas de cada uno.
+// Los dos turnos fijos aparecen siempre (aunque estén vacíos) si incluirVacios.
+export function agruparPorTurno(clases, incluirVacios) {
+  const grupos = {}
+  const add = (clave, hora) => {
+    if (!grupos[clave]) grupos[clave] = { clave, hora, fijo: !!TURNOS[clave], clases: [], ocupadas: 0, plazas: clave === 'sin' ? null : PLAZAS_POR_TURNO }
+    return grupos[clave]
+  }
+  if (incluirVacios) Object.keys(TURNOS).forEach(h => add(h, h))
+  clases.forEach(c => {
+    const g = add(claveTurno(c), c.hora || '')
+    g.clases.push(c)
+    if (!c.cancelada) g.ocupadas++
+  })
+  return Object.values(grupos).sort((x, y) => (x.hora || '99').localeCompare(y.hora || '99'))
 }

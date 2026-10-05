@@ -13,6 +13,7 @@ import AlertasModal from './components/modals/AlertasModal.jsx'
 import BackupModal from './components/modals/BackupModal.jsx'
 import WhatsappModal from './components/modals/WhatsappModal.jsx'
 import ConfirmacionPagoModal from './components/modals/ConfirmacionPagoModal.jsx'
+import EventoModal from './components/modals/EventoModal.jsx'
 import { useAppData } from './hooks/useAppData.js'
 import { useToast } from './hooks/useToast.js'
 import { getAlertas, getTareasPendientes } from './utils/business.js'
@@ -47,6 +48,10 @@ export default function App() {
   // Modal: confirmación de pago (whatsapp)
   const [confirmPagoOpen, setConfirmPagoOpen] = useState(false)
   const [confirmPagoAlumnoId, setConfirmPagoAlumnoId] = useState(null)
+
+  // Modal: gestión de clases de un día (clases puntuales).
+  // null = cerrado, o { modo: 'dia' | 'anadir' | 'mover', fecha, clase }
+  const [claseModal, setClaseModal] = useState(null)
 
   // Alumno a preseleccionar al entrar en Pagos desde el hero de Inicio
   const [pagosPreselect, setPagosPreselect] = useState(null)
@@ -129,6 +134,10 @@ export default function App() {
             onIrAPago={irAPago}
             onVerAlertas={() => setAlertasTipo('pagos')}
             onVerTareas={() => setAlertasTipo('tareas')}
+            onAbrirClase={setClaseModal}
+            cancelarClase={store.cancelarClase}
+            restaurarClase={store.restaurarClase}
+            toastDeshacer={toastDeshacer}
           />
         )
       case 'alumnos':
@@ -156,6 +165,7 @@ export default function App() {
             eliminarSesion={store.eliminarSesion}
             showToast={showToast}
             toastDeshacer={toastDeshacer}
+            onAbrirDia={fecha => setClaseModal({ modo: 'dia', fecha })}
           />
         )
       case 'pagos':
@@ -236,6 +246,19 @@ export default function App() {
         alumnoId={confirmPagoAlumnoId}
         onClose={() => setConfirmPagoOpen(false)}
         showToast={showToast}
+      />
+
+      <EventoModal
+        open={!!claseModal}
+        modo={claseModal ? claseModal.modo : 'dia'}
+        fecha={claseModal ? claseModal.fecha : ''}
+        clase={claseModal ? claseModal.clase : null}
+        data={data}
+        esFestivo={esFestivo}
+        acciones={{ anadirClase: store.anadirClase, moverClase: store.moverClase, cancelarClase: store.cancelarClase, restaurarClase: store.restaurarClase }}
+        onClose={() => setClaseModal(null)}
+        showToast={showToast}
+        toastDeshacer={toastDeshacer}
       />
 
       <Toast msg={msg} accion={accion} show={show} onCerrar={ocultar} />
